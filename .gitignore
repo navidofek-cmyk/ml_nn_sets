@@ -1,0 +1,29 @@
+# Zkompilované binárky
+cpp/01_regression/nn_regression
+cpp/02_mnist/nn_mnist
+cpp/03_custom/nn_custom
+
+# MNIST binární data (velká, stáhnou se přes download_mnist.sh)
+cpp/02_mnist/train-images-idx3-ubyte
+cpp/02_mnist/train-labels-idx1-ubyte
+cpp/02_mnist/t10k-images-idx3-ubyte
+cpp/02_mnist/t10k-labels-idx1-ubyte
+
+# Python venv a cache
+python/.venv/
+python/__pycache__/
+python/data/
+__pycache__/
+*.pyc
+
+# Vygenerované grafy
+python/*.png
+
+# Editor
+.vscode/
+*.swp
+*~
+
+# Prázdné soubory (artefakty)
+cti_to
+cti_To
