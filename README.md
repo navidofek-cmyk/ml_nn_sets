@@ -1,5 +1,8 @@
 # Neural Networks od nuly — C++ + Python (uv)
 
+[![Teorie – web](https://img.shields.io/badge/Teorie-web-6366f1)](https://navidofek-cmyk.github.io/ml_nn_sets)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb)
+
 Kompletní tutorial: od matematiky přes implementaci v C++ až po PyTorch ekvivalenty.
 
 ## Struktura
