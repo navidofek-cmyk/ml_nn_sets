@@ -38,6 +38,15 @@
     <a class="nav-item" href="#trenovani"><span class="num">7</span>Trénink v praxi</a>
   </div>
   <div class="nav-section">
+    <div class="nav-label">Kód</div>
+    <a class="nav-item" href="#struktura"><span class="num">📁</span>Struktura projektu</a>
+    <a class="nav-item" href="#cpp-matrix"><span class="num">⚙</span>matrix.hpp</a>
+    <a class="nav-item" href="#cpp-activations"><span class="num">⚙</span>activations.hpp</a>
+    <a class="nav-item" href="#cpp-losses"><span class="num">⚙</span>losses.hpp</a>
+    <a class="nav-item" href="#cpp-network"><span class="num">⚙</span>network.hpp</a>
+    <a class="nav-item" href="#python-code"><span class="num">🐍</span>Python verze</a>
+  </div>
+  <div class="nav-section">
     <div class="nav-label">Příklady</div>
     <a class="nav-item" href="#regrese"><span class="num">A</span>Regrese</a>
     <a class="nav-item" href="#klasifikace"><span class="num">B</span>Klasifikace</a>
@@ -723,6 +732,280 @@ opt = torch.optim.SGD(model.parameters(), lr=<span class="num">0.01</span>)
     <div class="card"><div class="card-icon">✂️</div><h4>Train/Val/Test split</h4><p>80 % / 10 % / 10 %</p></div>
     <div class="card"><div class="card-icon">🛑</div><h4>Early stopping</h4><p>Sleduj val_loss, ulož nejlepší váhy</p></div>
     <div class="card"><div class="card-icon">📏</div><h4>Metriky</h4><p>Precision, Recall, F1 (nestačí jen Accuracy)</p></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     STRUKTURA KÓDU
+══════════════════════════════════════════════════════════ -->
+<section class="section" id="struktura">
+  <div class="section-header"><div class="section-num">📁</div><h2>Struktura projektu</h2></div>
+  <p>Repozitář je rozdělený na tři části: <strong>C++ implementace od nuly</strong>, <strong>Python ekvivalenty</strong> (NumPy + PyTorch) a <strong>natrénované váhy</strong>. Žádné externí závislosti v C++, jen STL.</p>
+
+  <div class="math-block">
+    <div class="label">Adresářová struktura</div>
+<pre style="margin:0;background:transparent;color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7">nn_sets/
+├── <b>cpp/</b>
+│   ├── common/
+│   │   ├── matrix.hpp         <span style="color:var(--muted)"># 2D matice + lineární algebra</span>
+│   │   ├── activations.hpp    <span style="color:var(--muted)"># ReLU, Sigmoid, Tanh, Softmax + derivace</span>
+│   │   ├── losses.hpp         <span style="color:var(--muted)"># MSE, Cross-Entropy, BCE + gradienty</span>
+│   │   └── network.hpp        <span style="color:var(--muted)"># Layer, Network: forward, backward, SGD, Adam</span>
+│   ├── 01_regression/main.cpp <span style="color:var(--muted)"># sin(2πx) — regrese</span>
+│   ├── 02_mnist/main.cpp      <span style="color:var(--muted)"># MNIST 0–9 — klasifikace</span>
+│   └── 03_custom/main.cpp     <span style="color:var(--muted)"># two-moons — binární klasifikace</span>
+├── <b>python/</b>
+│   ├── 01_regression.py       <span style="color:var(--muted)"># NumPy od nuly + PyTorch verze</span>
+│   ├── 02_mnist.py            <span style="color:var(--muted)"># PyTorch + torchvision</span>
+│   ├── 03_custom.py           <span style="color:var(--muted)"># PyTorch + sklearn make_moons</span>
+│   ├── save_weights.py        <span style="color:var(--muted)"># natrénuje a uloží všechny modely</span>
+│   └── pyproject.toml         <span style="color:var(--muted)"># uv závislosti</span>
+├── <b>weights/</b>             <span style="color:var(--muted)"># předtrénované váhy (.bin pro C++, .pth pro PyTorch)</span>
+├── <b>docs/</b>                <span style="color:var(--muted)"># tenhle web</span>
+└── colab_tutorial.ipynb      <span style="color:var(--muted)"># Google Colab notebook</span></pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body"><strong>Proč C++ first?</strong> Když síť napíšeš ve frameworku (PyTorch), všechno je černá skříňka. Když ji napíšeš v C++ s holýma rukama, vidíš každou maticovou operaci a každý krok backpropu. Python verze pak slouží jako srovnání.</div>
+  </div>
+</section>
+
+<!-- ── matrix.hpp ── -->
+<section class="section" id="cpp-matrix">
+  <div class="section-header"><div class="section-num">⚙</div><h2><code style="font-size:0.7em">cpp/common/matrix.hpp</code></h2></div>
+  <p>Základní stavební kámen — 2D matice <code>double</code> v row-major paměti. Žádný BLAS, jen vlastní implementace operací potřebných pro forward i backward.</p>
+
+  <h3>Co umí</h3>
+  <table>
+    <thead><tr><th>Operace</th><th>Matematika</th><th>K čemu</th></tr></thead>
+    <tbody>
+      <tr><td><code>A * B</code></td><td>\(C_{ij} = \sum_k A_{ik} B_{kj}\)</td><td>forward (\(Wx\)), backward (\(W^T \delta\))</td></tr>
+      <tr><td><code>A + B</code>, <code>A - B</code></td><td>elementwise</td><td>update vah \(W - \alpha \cdot dW\)</td></tr>
+      <tr><td><code>A * scalar</code></td><td>\(c \cdot A_{ij}\)</td><td>learning rate škálování</td></tr>
+      <tr><td><code>A.T()</code></td><td>transpozice \(A^T\)</td><td>\(\partial L / \partial W = \delta \cdot a^T\)</td></tr>
+      <tr><td><code>A.hadamard(B)</code></td><td>\(A_{ij} \cdot B_{ij}\)</td><td>backprop: \(\delta \odot f'(z)\)</td></tr>
+      <tr><td><code>A.add_bias(b)</code></td><td>\(A_{:,j} + \mathbf{b}\) pro každý sloupec</td><td>přičtení biasu k batch dávce</td></tr>
+      <tr><td><code>A.sum_cols()</code></td><td>\(\sum_j A_{:,j}\)</td><td>\(\partial L / \partial \mathbf{b}\) — součet přes batch</td></tr>
+      <tr><td><code>he_init(n)</code></td><td>\(W_{ij} \sim \mathcal{N}(0, 2/n)\)</td><td>inicializace pro ReLU</td></tr>
+      <tr><td><code>xavier_init(n,m)</code></td><td>\(W_{ij} \sim \mathcal{N}(0, 2/(n+m))\)</td><td>inicializace pro Sigmoid/Tanh</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Klíčová matematika uvnitř</h3>
+  <div class="math-block">
+    <div class="label">Maticový součin (forward i backward)</div>
+    $$(A \cdot B)_{ij} = \sum_{k=1}^{n} A_{ik} \cdot B_{kj}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Implementováno trojitým <code>for</code> cyklem. Pro <em>batch</em> trénink je každý sloupec vstupu jeden vzorek — \(W \cdot X\) tedy spočítá pre-aktivace všech vzorků najednou.</p>
+  </div>
+
+  <div class="math-block">
+    <div class="label">He inicializace — proč variance 2/n</div>
+    $$\text{Var}(z_i) = \sum_{j=1}^{n} \text{Var}(W_{ij}) \cdot \text{Var}(a_j) = n \cdot \text{Var}(W) \cdot \text{Var}(a)$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Aby variance pre-aktivace zůstala stabilní (\(\text{Var}(z) \approx \text{Var}(a)\)), potřebujeme \(\text{Var}(W) = 1/n\). Pro ReLU, která <em>vynuluje polovinu</em> aktivací, kompenzujeme dvojnásobkem: \(\text{Var}(W) = 2/n\).</p>
+  </div>
+</section>
+
+<!-- ── activations.hpp ── -->
+<section class="section" id="cpp-activations">
+  <div class="section-header"><div class="section-num">⚙</div><h2><code style="font-size:0.7em">cpp/common/activations.hpp</code></h2></div>
+  <p>Každá aktivace má dvě funkce: <strong>apply</strong> (pro forward) a <strong>derivative</strong> (pro backprop). Enum <code>Activation</code> volí mezi nimi.</p>
+
+  <h3>Implementované aktivace</h3>
+  <div class="math-block">
+    <div class="label">ReLU — Rectified Linear Unit</div>
+    $$\text{ReLU}(z) = \max(0, z) \qquad \text{ReLU}'(z) = \begin{cases}1 & z > 0\\ 0 & z \le 0\end{cases}$$
+  </div>
+  <div class="math-block">
+    <div class="label">Sigmoid</div>
+    $$\sigma(z) = \frac{1}{1+e^{-z}} \qquad \sigma'(z) = \sigma(z) \cdot (1 - \sigma(z))$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Derivaci spočítáme jednoduše z hodnoty <code>a = sigmoid(z)</code> — netřeba znovu počítat exponenciálu.</p>
+  </div>
+  <div class="math-block">
+    <div class="label">Tanh</div>
+    $$\tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}} \qquad \tanh'(z) = 1 - \tanh^2(z)$$
+  </div>
+  <div class="math-block">
+    <div class="label">Softmax — pro klasifikační výstup</div>
+    $$\text{softmax}(z)_i = \frac{e^{z_i}}{\sum_j e^{z_j}}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px"><strong>Numerický trik:</strong> v kódu odčítáme max(\(z\)) před exponenciálou — \(e^{z_i - \max(z)}\) — aby se nepřetekly hodnoty. Výsledek je matematicky identický.</p>
+  </div>
+
+  <div class="callout warning">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>Softmax derivaci nepoužíváme samostatně.</strong> Jacobián softmaxu je matice \(n \times n\), což je drahé. Místo toho kombinujeme softmax s Cross-Entropy — derivace se zjednoduší na \(\hat{y} - y\). Network class to detekuje a přeskočí násobení derivací aktivace v poslední vrstvě.</div>
+  </div>
+</section>
+
+<!-- ── losses.hpp ── -->
+<section class="section" id="cpp-losses">
+  <div class="section-header"><div class="section-num">⚙</div><h2><code style="font-size:0.7em">cpp/common/losses.hpp</code></h2></div>
+  <p>Každá loss má taky dvě funkce: <strong>loss</strong> (skalární hodnota) a <strong>grad</strong> (gradient vůči predikci, předaný do <code>backward()</code>).</p>
+
+  <h3>MSE — Mean Squared Error (regrese)</h3>
+  <div class="math-block">
+    <div class="label">Loss + gradient</div>
+    $$\mathcal{L}_{MSE} = \frac{1}{B} \sum_{i=1}^{B} (\hat{y}_i - y_i)^2 \qquad \frac{\partial \mathcal{L}}{\partial \hat{y}_i} = \frac{2(\hat{y}_i - y_i)}{B}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Vrací \(\partial \mathcal{L} / \partial \hat{y}\) — backward() pak sám aplikuje derivaci aktivace v poslední vrstvě (Linear: derivace = 1).</p>
+  </div>
+
+  <h3>Cross-Entropy — vícetřídová klasifikace</h3>
+  <div class="math-block">
+    <div class="label">Loss</div>
+    $$\mathcal{L}_{CE} = -\frac{1}{B} \sum_{i=1}^{B} \sum_{c=1}^{C} y_{i,c} \log(\hat{y}_{i,c})$$
+  </div>
+  <div class="math-block">
+    <div class="label">Kombinovaný gradient softmax + CE</div>
+    $$\frac{\partial \mathcal{L}}{\partial \mathbf{z}} = \frac{\hat{\mathbf{y}} - \mathbf{y}}{B}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Funkce <code>softmax_crossentropy_grad()</code> vrací rovnou \(\partial \mathcal{L} / \partial \mathbf{z}\) (pre-aktivaci), ne \(\partial \mathcal{L} / \partial \hat{y}\). Tím obejdeme Jacobián softmaxu.</p>
+  </div>
+
+  <h3>BCE — Binary Cross-Entropy</h3>
+  <div class="math-block">
+    <div class="label">Loss + kombinovaný gradient sigmoid + BCE</div>
+    $$\mathcal{L}_{BCE} = -\frac{1}{B}\sum_i \big[y_i \log \hat{y}_i + (1-y_i)\log(1-\hat{y}_i)\big]$$
+    $$\frac{\partial \mathcal{L}}{\partial z} = \frac{\hat{y} - y}{B}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Stejně jako u CE: <code>bce_sigmoid_grad()</code> vrací \(\partial \mathcal{L} / \partial z\) přímo. V backward() pak nastavujeme <code>combined=true</code>, aby se nepřenásobilo derivací sigmoidu znovu.</p>
+  </div>
+
+  <div class="callout danger">
+    <div class="callout-icon">🐛</div>
+    <div class="callout-body"><strong>Bug, který jsem opravil během tréninku:</strong> grad_fn dělí výsledek <em>B</em>, takže když pak <code>backward()</code> volá <code>delta.sum_cols()</code>, dostane se průměr — nesmí se znovu dělit B. Původně tam bylo <code>db = sum_cols() * (1/B)</code>, což dělilo dvakrát. Two-moons jsem pak naučil na 100 %.</div>
+  </div>
+</section>
+
+<!-- ── network.hpp ── -->
+<section class="section" id="cpp-network">
+  <div class="section-header"><div class="section-num">⚙</div><h2><code style="font-size:0.7em">cpp/common/network.hpp</code></h2></div>
+  <p>Srdce knihovny. Obsahuje <code>Layer</code> (jedna vrstva s váhami a Adam momenty) a <code>Network</code> (kontejner vrstev + tréninková logika).</p>
+
+  <h3>Struktura <code>Layer</code></h3>
+  <table>
+    <thead><tr><th>Pole</th><th>Co je</th><th>Vzorec</th></tr></thead>
+    <tbody>
+      <tr><td><code>W, b</code></td><td>parametry vrstvy</td><td>\(\mathbf{z} = W\mathbf{a} + \mathbf{b}\)</td></tr>
+      <tr><td><code>dW, db</code></td><td>gradienty po backwardu</td><td>\(\partial \mathcal{L}/\partial W\), \(\partial \mathcal{L}/\partial \mathbf{b}\)</td></tr>
+      <tr><td><code>z, a</code></td><td>cache pre-aktivace a aktivace</td><td>\(\mathbf{z}\), \(\mathbf{a} = f(\mathbf{z})\)</td></tr>
+      <tr><td><code>mW, vW, mb, vb</code></td><td>Adam 1. a 2. moment</td><td>klouzavé průměry \(g\) a \(g^2\)</td></tr>
+      <tr><td><code>act</code></td><td>výběr aktivace</td><td>ReLU / Sigmoid / Tanh / Softmax / Linear</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Forward pass</h3>
+  <div class="math-block">
+    <div class="label">Pro každou vrstvu \(l = 1, 2, \dots, L\)</div>
+    $$\mathbf{z}^{(l)} = W^{(l)} \mathbf{a}^{(l-1)} + \mathbf{b}^{(l)}, \qquad \mathbf{a}^{(l)} = f^{(l)}(\mathbf{z}^{(l)})$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">V kódu: <code>for (auto&amp; layer : layers) { layer.z = layer.W * a + layer.b; layer.a = apply(layer.z, layer.act); a = layer.a; }</code>. <code>z</code> a <code>a</code> se cachují — backward je potřebuje.</p>
+  </div>
+
+  <h3>Backward pass (backpropagation)</h3>
+  <div class="math-block">
+    <div class="label">Chain rule, od poslední vrstvy směrem k první</div>
+    $$\delta^{(L)} = \frac{\partial \mathcal{L}}{\partial \mathbf{z}^{(L)}} \quad \text{(předáno zvenku přes grad_fn)}$$
+    $$\delta^{(l)} = \big(W^{(l+1)\,T} \delta^{(l+1)}\big) \odot f'^{(l)}(\mathbf{z}^{(l)})$$
+    $$\frac{\partial \mathcal{L}}{\partial W^{(l)}} = \delta^{(l)} \cdot \mathbf{a}^{(l-1)\,T} \qquad \frac{\partial \mathcal{L}}{\partial \mathbf{b}^{(l)}} = \sum_{batch} \delta^{(l)}$$
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">🔑</div>
+    <div class="callout-body"><strong>Parametr <code>combined</code>:</strong> když loss vrací rovnou \(\partial \mathcal{L}/\partial \mathbf{z}\) (softmax+CE, sigmoid+BCE), poslední vrstvu <em>nenásobíme</em> derivací aktivace — jinak bychom ji aplikovali dvakrát. Detekce: <code>combined &amp;&amp; l == L-1</code> nebo <code>act == Softmax</code>.</div>
+  </div>
+
+  <h3>SGD update</h3>
+  <div class="math-block">
+    $$W \leftarrow W - \alpha \cdot \frac{\partial \mathcal{L}}{\partial W}, \qquad \mathbf{b} \leftarrow \mathbf{b} - \alpha \cdot \frac{\partial \mathcal{L}}{\partial \mathbf{b}}$$
+  </div>
+
+  <h3>Adam update</h3>
+  <div class="math-block">
+    <div class="label">Per-parametr adaptivní lr (Kingma &amp; Ba, 2015)</div>
+    $$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t$$
+    $$v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2$$
+    $$\hat{m}_t = \frac{m_t}{1-\beta_1^t}, \qquad \hat{v}_t = \frac{v_t}{1-\beta_2^t}$$
+    $$\theta_t \leftarrow \theta_{t-1} - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Defaultní hodnoty: \(\beta_1 = 0.9\), \(\beta_2 = 0.999\), \(\epsilon = 10^{-8}\). <code>adam_step</code> se inkrementuje při každém volání <code>update_adam()</code> pro bias correction.</p>
+  </div>
+
+  <h3>Tréninková smyčka <code>train_epoch()</code></h3>
+  <div class="math-block">
+    <div class="label">Pseudokód</div>
+<pre style="margin:0;background:transparent;color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7">for start in 0, batch_size, 2·batch_size, …:
+    X_batch, Y_batch = X[:, start:start+B], Y[:, start:start+B]
+    ŷ = forward(X_batch)               <span style="color:var(--muted)"># cachuje z, a</span>
+    loss += loss_fn(ŷ, Y_batch)
+    backward(X_batch, grad_fn(ŷ, Y_batch), combined)
+    update()                           <span style="color:var(--muted)"># SGD nebo Adam</span></pre>
+  </div>
+
+  <h3>Save / load (binární formát NNWF)</h3>
+  <div class="math-block">
+    <div class="label">Layout souboru</div>
+<pre style="margin:0;background:transparent;color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7">magic    : uint32  = 0x4E4E5746  <span style="color:var(--muted)"># "NNWF"</span>
+n_layers : uint32
+for každou vrstvu:
+    W_rows : uint32
+    W_cols : uint32
+    W_data : double × W_rows × W_cols
+    b_rows : uint32
+    b_data : double × b_rows</pre>
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Jednoduchý binární formát kompatibilní s C++. Pro Python ukládáme do <code>.pth</code> přes <code>torch.save(model.state_dict())</code>.</p>
+  </div>
+</section>
+
+<!-- ── Python verze ── -->
+<section class="section" id="python-code">
+  <div class="section-header"><div class="section-num">🐍</div><h2>Python verze (NumPy + PyTorch)</h2></div>
+  <p>Pythonová část slouží jako <strong>kontrola</strong> — když se C++ síť a PyTorch síť shodnou na ~stejné loss/accuracy, máme jistotu že C++ implementace je správně.</p>
+
+  <h3>Soubory v <code>python/</code></h3>
+  <table>
+    <thead><tr><th>Soubor</th><th>Co dělá</th><th>Závislosti</th></tr></thead>
+    <tbody>
+      <tr><td><code>01_regression.py</code></td><td>2 verze sin(2πx): vlastní NumPy backprop + PyTorch <code>nn.Sequential</code></td><td>numpy, torch, matplotlib</td></tr>
+      <tr><td><code>02_mnist.py</code></td><td>MNIST přes <code>torchvision</code>, SGD+momentum, ~97 % acc</td><td>torch, torchvision</td></tr>
+      <tr><td><code>03_custom.py</code></td><td>Two-moons (<code>sklearn.make_moons</code>), Adam, early stopping, 100 % acc</td><td>torch, sklearn</td></tr>
+      <tr><td><code>save_weights.py</code></td><td>Natrénuje všechny 3 modely a uloží do <code>weights/</code> jako <code>.pth</code></td><td>vše výše</td></tr>
+      <tr><td><code>pyproject.toml</code></td><td>uv konfigurace závislostí</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h3>NumPy backprop v <code>01_regression.py</code></h3>
+  <p>Ručně implementovaný forward i backward, paralela k C++ verzi:</p>
+  <div class="math-block">
+    <div class="label">Backward (vyňatek)</div>
+<pre style="margin:0;background:transparent;color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7"><span style="color:var(--muted)"># grad MSE: ∂L/∂ŷ</span>
+dL_dy = 2 * (y_pred - y) / B
+
+<span style="color:var(--muted)"># backprop přes Linear → ReLU → Linear → ReLU → Linear</span>
+dL_dz3 = dL_dy
+dW3 = dL_dz3 @ a2.T
+db3 = dL_dz3.sum(axis=1, keepdims=True)
+
+dL_da2 = W3.T @ dL_dz3
+dL_dz2 = dL_da2 * (z2 > 0)   <span style="color:var(--muted)"># ReLU'</span>
+dW2 = dL_dz2 @ a1.T
+db2 = dL_dz2.sum(axis=1, keepdims=True)
+…</pre>
+  </div>
+
+  <h3>PyTorch zkratka</h3>
+  <p>Stejná síť v PyTorch — autograd to udělá samo, my jenom definujeme architekturu a loss:</p>
+  <div class="math-block">
+<pre style="margin:0;background:transparent;color:var(--fg);font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.7">model = nn.Sequential(
+    nn.Linear(1, 32), nn.ReLU(),
+    nn.Linear(32, 32), nn.ReLU(),
+    nn.Linear(32, 1))
+opt = torch.optim.SGD(model.parameters(), lr=0.01)
+
+for epoch in range(500):
+    for xb, yb in loader:
+        loss = nn.MSELoss()(model(xb), yb)
+        opt.zero_grad(); loss.backward(); opt.step()</pre>
+  </div>
+
+  <div class="callout info">
+    <div class="callout-icon">🎯</div>
+    <div class="callout-body"><strong>Gradient check.</strong> Pro ověření backpropu jsem porovnal analytický gradient (z C++ <code>backward()</code>) s numerickým (\((\mathcal{L}(\theta + \epsilon) - \mathcal{L}(\theta - \epsilon))/(2\epsilon)\)). Relativní chyba byla <code>8.64e-8</code> — backprop je správně.</div>
   </div>
 </section>
 

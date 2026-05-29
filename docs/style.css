@@ -318,7 +318,9 @@ p code, li code {
 .callout-body strong { color: var(--text); }
 .callout.tip   { border-left: 3px solid var(--green); }
 .callout.warn  { border-left: 3px solid var(--yellow); }
+.callout.warning  { border-left: 3px solid var(--yellow); }
 .callout.info  { border-left: 3px solid var(--accent); }
+.callout.danger { border-left: 3px solid #ef4444; }
 
 /* ── Table ── */
 table {
