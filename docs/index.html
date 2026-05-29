@@ -26,7 +26,6 @@
     <h1>NN od nuly</h1>
     <p>C++ &amp; Python tutorial</p>
   </div>
-
   <div class="nav-section">
     <div class="nav-label">Teorie</div>
     <a class="nav-item active" href="#uvod"><span class="num">0</span>Úvod</a>
@@ -38,582 +37,706 @@
     <a class="nav-item" href="#inicializace"><span class="num">6</span>Inicializace vah</a>
     <a class="nav-item" href="#trenovani"><span class="num">7</span>Trénink v praxi</a>
   </div>
-
   <div class="nav-section">
     <div class="nav-label">Příklady</div>
     <a class="nav-item" href="#regrese"><span class="num">A</span>Regrese</a>
     <a class="nav-item" href="#klasifikace"><span class="num">B</span>Klasifikace</a>
     <a class="nav-item" href="#custom"><span class="num">C</span>Vlastní data</a>
   </div>
-
   <div class="nav-section">
     <div class="nav-label">Kód &amp; Váhy</div>
-    <a class="nav-item" href="https://github.com/navidofek-cmyk/ml_nn_sets" target="_blank">
-      <span class="num">↗</span>GitHub
-    </a>
-    <a class="nav-item" href="https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb" target="_blank">
-      <span class="num">▶</span>Colab notebook
-    </a>
-    <a class="nav-item" href="#vahy">
-      <span class="num">⬇</span>Stáhnout váhy
-    </a>
+    <a class="nav-item" href="https://github.com/navidofek-cmyk/ml_nn_sets" target="_blank"><span class="num">↗</span>GitHub</a>
+    <a class="nav-item" href="https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb" target="_blank"><span class="num">▶</span>Colab</a>
+    <a class="nav-item" href="#vahy"><span class="num">⬇</span>Váhy</a>
   </div>
 </nav>
 
 <!-- ── Main ── -->
 <main class="main">
 
-  <!-- Hero -->
-  <div class="hero" id="uvod">
-    <div class="hero-badge">🧠 Od základů k implementaci</div>
-    <h1>Neuronové sítě<br><span>od nuly</span></h1>
-    <p>Kompletní průvodce: od matematiky přes C++ implementaci až po PyTorch. Žádné černé skříňky.</p>
-    <div class="hero-links">
-      <a class="btn btn-primary" href="https://github.com/navidofek-cmyk/ml_nn_sets" target="_blank">⬡ GitHub repozitář</a>
-      <a class="btn btn-ghost" href="https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb" target="_blank">▶ Spustit v Colabu</a>
-      <a class="btn btn-ghost" href="#vrstva">Začít číst →</a>
+<!-- Hero -->
+<div class="hero" id="uvod">
+  <div class="hero-badge">🧠 Od základů k implementaci</div>
+  <h1>Neuronové sítě<br><span>od nuly</span></h1>
+  <p>Kompletní průvodce: od matematiky přes C++ implementaci až po PyTorch. Žádné černé skříňky.</p>
+  <div class="hero-links">
+    <a class="btn btn-primary" href="https://github.com/navidofek-cmyk/ml_nn_sets" target="_blank">⬡ GitHub</a>
+    <a class="btn btn-ghost" href="https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb" target="_blank">▶ Colab</a>
+    <a class="btn btn-ghost" href="#vrstva">Začít číst →</a>
+  </div>
+</div>
+
+<div class="cards">
+  <div class="card"><div class="card-icon">📐</div><h4>Matematika</h4><p>Derivace, chain rule, gradienty — bez zkratek</p></div>
+  <div class="card"><div class="card-icon">⚙️</div><h4>C++ od nuly</h4><p>Matice, backprop, Adam — čistá STL</p></div>
+  <div class="card"><div class="card-icon">🐍</div><h4>Python / PyTorch</h4><p>Totéž v NumPy a PyTorch, přes uv</p></div>
+  <div class="card"><div class="card-icon">🎯</div><h4>3 příklady</h4><p>Regrese, MNIST, vlastní dataset</p></div>
+</div>
+
+<hr class="divider">
+
+<!-- ══════════════════════════════════════════════════════════
+     1. JEDNA VRSTVA
+══════════════════════════════════════════════════════════ -->
+<section class="section" id="vrstva">
+  <div class="section-header"><div class="section-num">1</div><h2>Jedna vrstva</h2></div>
+
+  <p>Neuronová síť je složená z <strong>vrstev</strong>. Každá vrstva provádí jednoduchou operaci: lineární transformaci následovanou nelinearitou.</p>
+
+  <h3>Lineární část</h3>
+  <p>Vstupní vektor \(\mathbf{a} \in \mathbb{R}^{n_{in}}\) se transformuje na \(\mathbf{z} \in \mathbb{R}^{n_{out}}\):</p>
+  <div class="math-block">
+    <div class="label">Lineární transformace</div>
+    $$\mathbf{z} = W \cdot \mathbf{a} + \mathbf{b}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">
+      \(W \in \mathbb{R}^{n_{out} \times n_{in}}\) — matice vah &nbsp;|&nbsp;
+      \(\mathbf{b} \in \mathbb{R}^{n_{out}}\) — bias vektor &nbsp;|&nbsp;
+      \(\mathbf{z} \in \mathbb{R}^{n_{out}}\) — pre-aktivace
+    </p>
+  </div>
+
+  <p>Každý výstupní neuron \(z_i\) je tedy váhovaný součet všech vstupů plus bias:</p>
+  <div class="math-block">
+    <div class="label">Rozepsáno pro jeden neuron</div>
+    $$z_i = \sum_{j=1}^{n_{in}} W_{ij} \cdot a_j + b_i$$
+  </div>
+
+  <h3>Proč přidáváme bias?</h3>
+  <p>Bias \(\mathbf{b}\) posunuje aktivaci neuronu nezávisle na vstupu. Bez biasu by každá přímka musela procházet počátkem — s biasem může libovolně posouvat rozhodovací hranici.</p>
+
+  <h3>Nelineární část — aktivace</h3>
+  <div class="math-block">
+    <div class="label">Výstup vrstvy</div>
+    $$\mathbf{a}_{next} = f(\mathbf{z})$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">kde \(f\) je aktivační funkce aplikovaná po prvcích (element-wise)</p>
+  </div>
+
+  <h3>Proč nelinearita?</h3>
+  <p>Bez aktivační funkce by skládání \(L\) vrstev bylo ekvivalentní jedné vrstvě:</p>
+  <div class="math-block">
+    <div class="label">Bez aktivace — dvě vrstvy = jedna vrstva</div>
+    $$W_2 (W_1 \mathbf{x} + \mathbf{b}_1) + \mathbf{b}_2 = \underbrace{(W_2 W_1)}_{\tilde{W}} \mathbf{x} + \underbrace{W_2 \mathbf{b}_1 + \mathbf{b}_2}_{\tilde{\mathbf{b}}}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Výsledek je stále lineární funkce — bez ohledu na počet vrstev. Aktivace tuto symetrii rozbíjí.</p>
+  </div>
+
+  <h3>Batch processing</h3>
+  <p>V praxi nepracujeme s jedním vzorkem, ale s <strong>dávkou</strong> (batch) \(B\) vzorků najednou. Vstup je matice \(X \in \mathbb{R}^{n_{in} \times B}\) — každý sloupec je jeden vzorek.</p>
+  <div class="math-block">
+    <div class="label">Forward pass pro celou dávku</div>
+    $$Z = W \cdot X + \mathbf{b} \cdot \mathbf{1}^T \quad \in \mathbb{R}^{n_{out} \times B}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Bias se broadcastuje přes všechny sloupce (vzorky).</p>
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-tabs">
+      <button class="code-tab active" onclick="switchTab(this,'cpp-vrstva')">C++</button>
+      <button class="code-tab" onclick="switchTab(this,'py-vrstva')">Python / NumPy</button>
+    </div>
+    <div id="cpp-vrstva" class="code-panel active">
+<pre><span class="cm">// Forward pass — vstup x: (in × B), výstup: (out × B)</span>
+layer.z = layer.W * x;           <span class="cm">// Z = W·X  (matmul)</span>
+layer.z = layer.z.add_bias(b);   <span class="cm">// Z += b   (broadcast přes B sloupců)</span>
+layer.a = apply_activation(layer.z, layer.act); <span class="cm">// A = f(Z)</span></pre>
+    </div>
+    <div id="py-vrstva" class="code-panel">
+<pre><span class="cm"># x: (B × in), výstup: (B × out)</span>
+z = x @ W.T + b    <span class="cm"># W.T: (in × out) → z: (B × out)</span>
+a = np.maximum(0, z)  <span class="cm"># ReLU — nebo jiná aktivace</span></pre>
     </div>
   </div>
 
-  <!-- Overview cards -->
-  <div class="cards">
-    <div class="card">
-      <div class="card-icon">📐</div>
-      <h4>Matematika</h4>
-      <p>Derivace, chain rule, gradienty — bez zkratek</p>
-    </div>
-    <div class="card">
-      <div class="card-icon">⚙️</div>
-      <h4>C++ od nuly</h4>
-      <p>Matice, backprop, Adam — čistá STL</p>
-    </div>
-    <div class="card">
-      <div class="card-icon">🐍</div>
-      <h4>Python / PyTorch</h4>
-      <p>Totéž v NumPy a PyTorch, přes uv</p>
-    </div>
-    <div class="card">
-      <div class="card-icon">🎯</div>
-      <h4>3 příklady</h4>
-      <p>Regrese, MNIST, vlastní dataset</p>
-    </div>
+  <h3>Celá síť = skládání vrstev</h3>
+  <div class="math-block">
+    <div class="label">Forward pass — L vrstev</div>
+    $$\mathbf{a}^{(0)} = \mathbf{x}$$
+    $$\mathbf{z}^{(l)} = W^{(l)} \mathbf{a}^{(l-1)} + \mathbf{b}^{(l)} \quad l = 1, \dots, L$$
+    $$\mathbf{a}^{(l)} = f^{(l)}(\mathbf{z}^{(l)})$$
+    $$\hat{\mathbf{y}} = \mathbf{a}^{(L)}$$
   </div>
+</section>
 
-  <hr class="divider">
+<!-- ══════════════════════════════════════════════════════════
+     2. AKTIVAČNÍ FUNKCE
+══════════════════════════════════════════════════════════ -->
+<section class="section" id="aktivace">
+  <div class="section-header"><div class="section-num">2</div><h2>Aktivační funkce</h2></div>
 
-  <!-- ── 1. Jedna vrstva ── -->
-  <section class="section" id="vrstva">
-    <div class="section-header">
-      <div class="section-num">1</div>
-      <h2>Jedna vrstva</h2>
+  <p>Aktivační funkce musí být <strong>nelineární</strong> a ideálně <strong>diferencovatelná</strong> téměř všude — potřebujeme derivaci pro backpropagation.</p>
+
+  <h3>ReLU — Rectified Linear Unit</h3>
+  <div class="math-block">
+    <div class="label">Definice a derivace</div>
+    $$f(z) = \max(0, z) = \begin{cases} z & z > 0 \\ 0 & z \leq 0 \end{cases}$$
+    $$f'(z) = \begin{cases} 1 & z > 0 \\ 0 & z \leq 0 \end{cases}$$
+  </div>
+  <p><strong>Výhody:</strong> Jednoduchý výpočet, nezpůsobuje saturaci pro kladné hodnoty, v praxi funguje velmi dobře.</p>
+  <p><strong>Nevýhoda:</strong> <em>Dying ReLU</em> — pokud neuron dostane záporné vstupy pro všechny vzorky, gradient je vždy 0 a neuron se přestane učit. Řeší se správnou inicializací (He) a normalizací vstupů.</p>
+
+  <div class="code-wrap">
+    <div class="code-tabs">
+      <button class="code-tab active" onclick="switchTab(this,'cpp-relu')">C++</button>
+      <button class="code-tab" onclick="switchTab(this,'py-relu')">Python</button>
     </div>
-
-    <p>Neuronová síť je složená z <strong>vrstev</strong>. Každá vrstva dělá dvě věci: lineární transformaci a nelinearitu.</p>
-
-    <div class="math-block">
-      <div class="label">Lineární část</div>
-      $$\mathbf{z} = W \cdot \mathbf{a}_{prev} + \mathbf{b}$$
-    </div>
-
-    <div class="math-block">
-      <div class="label">Nelineární část (aktivace)</div>
-      $$\mathbf{a} = f(\mathbf{z})$$
-    </div>
-
-    <p>Kde \(W\) je matice vah tvaru \((n_{out} \times n_{in})\), \(\mathbf{b}\) je bias vektor a \(f\) je aktivační funkce.</p>
-
-    <h3>Proč nelinearita?</h3>
-    <p>Bez aktivační funkce by \(L\) vrstev bylo ekvivalentní jedné vrstvě — skládání lineárních funkcí dává opět lineární funkci. Aktivace dávají síti schopnost naučit se složité (nelineární) vzory.</p>
-
-    <div class="callout info">
-      <div class="callout-icon">💡</div>
-      <div class="callout-body"><strong>Vstup celé sítě</strong> je matice \(X\) tvaru \((features \times batch\_size)\) — každý sloupec je jeden vzorek. Batch processing = paralelní zpracování více vzorků najednou.</div>
-    </div>
-
-    <h3>C++ implementace</h3>
-    <div class="code-wrap">
-      <div class="code-tabs">
-        <button class="code-tab active" onclick="switchTab(this,'cpp-vrstva')">C++</button>
-        <button class="code-tab" onclick="switchTab(this,'py-vrstva')">Python</button>
-      </div>
-      <div id="cpp-vrstva" class="code-panel active">
-<pre><span class="cm">// Forward pass jedné vrstvy</span>
-<span class="cm">// x: vstup (in × B), výstup: (out × B)</span>
-layer.z = layer.W * x;          <span class="cm">// z = W·x  (matmul)</span>
-layer.z = layer.z.add_bias(b);  <span class="cm">// z += b   (broadcast)</span>
-layer.a = apply_activation(layer.z, layer.act); <span class="cm">// a = f(z)</span></pre>
-      </div>
-      <div id="py-vrstva" class="code-panel">
-<pre><span class="cm"># Totéž v PyTorch (automaticky batch-aware)</span>
-z = x @ W.T + b   <span class="cm"># (B × out)</span>
-a = torch.relu(z) <span class="cm"># nebo sigmoid, softmax...</span></pre>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── 2. Aktivační funkce ── -->
-  <section class="section" id="aktivace">
-    <div class="section-header">
-      <div class="section-num">2</div>
-      <h2>Aktivační funkce</h2>
-    </div>
-
-    <p>Aktivační funkce musí být <strong>nelineární</strong> a ideálně <strong>diferencovatelná</strong> (potřebujeme derivaci pro backprop).</p>
-
-    <div class="act-grid">
-      <div class="act-card">
-        <h4>ReLU</h4>
-        <div class="formula">f(z) = max(0, z)</div>
-        <div class="formula">f'(z) = 1 pokud z &gt; 0</div>
-        <p class="note">Skryté vrstvy. Jednoduchá, rychlá, funguje skvěle.</p>
-      </div>
-      <div class="act-card">
-        <h4>Sigmoid</h4>
-        <div class="formula">f(z) = 1/(1+e⁻ᶻ)</div>
-        <div class="formula">f'(z) = f(z)·(1−f(z))</div>
-        <p class="note">Binární klasifikace (výstup). Mapuje ℝ → (0,1).</p>
-      </div>
-      <div class="act-card">
-        <h4>Softmax</h4>
-        <div class="formula">f(zᵢ) = eᶻⁱ / Σ eᶻʲ</div>
-        <div class="formula">součet = 1</div>
-        <p class="note">Víc-třídní klasifikace. Výstup = pravděpodobnosti.</p>
-      </div>
-      <div class="act-card">
-        <h4>Lineární</h4>
-        <div class="formula">f(z) = z</div>
-        <div class="formula">f'(z) = 1</div>
-        <p class="note">Výstupní vrstva regrese. Neomezený výstup.</p>
-      </div>
-    </div>
-
-    <div class="math-block">
-      <div class="label">Softmax — numericky stabilní verze</div>
-      $$f(z_i) = \frac{e^{z_i - \max(\mathbf{z})}}{\sum_j e^{z_j - \max(\mathbf{z})}}$$
-      <p style="margin-top:8px; font-size:13px; color: var(--muted)">Odečtení maxima před exponenciálou zabrání přetečení (overflow), výsledek se nemění.</p>
-    </div>
-
-    <div class="callout warn">
-      <div class="callout-icon">⚠️</div>
-      <div class="callout-body"><strong>Dying ReLU:</strong> Pokud neuron dostane záporný vstup pro všechny vzorky, gradient bude vždy 0 a neuron se přestane učit. Řešení: He inicializace + normalizace vstupů.</div>
-    </div>
-  </section>
-
-  <!-- ── 3. Loss funkce ── -->
-  <section class="section" id="loss">
-    <div class="section-header">
-      <div class="section-num">3</div>
-      <h2>Loss funkce</h2>
-    </div>
-
-    <p>Loss funkce měří, jak moc se predikce \(\hat{y}\) liší od skutečnosti \(y\). Optimalizujeme parametry \(\theta\) minimalizací loss.</p>
-
-    <table>
-      <thead>
-        <tr><th>Loss</th><th>Úloha</th><th>Vzorec</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>MSE</strong></td>
-          <td>Regrese</td>
-          <td>\(\frac{1}{n}\sum(\hat{y}_i - y_i)^2\)</td>
-        </tr>
-        <tr>
-          <td><strong>Cross-Entropy</strong></td>
-          <td>Klasifikace (víc tříd)</td>
-          <td>\(-\sum_c y_c \log(\hat{y}_c)\)</td>
-        </tr>
-        <tr>
-          <td><strong>BCE</strong></td>
-          <td>Binární klasifikace</td>
-          <td>\(-[y\log\hat{y} + (1-y)\log(1-\hat{y})]\)</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <h3>Gradient MSE</h3>
-    <div class="math-block">
-      <div class="label">∂L/∂ŷ pro MSE</div>
-      $$\frac{\partial L}{\partial \hat{y}} = \frac{2}{n}(\hat{y} - y)$$
-    </div>
-
-    <h3>Kombinovaný gradient Softmax + Cross-Entropy</h3>
-    <p>Při jejich kombinaci se derivace zjednodušší elegantně:</p>
-    <div class="math-block">
-      <div class="label">∂L/∂z pro Softmax + CE (jeden řádec výpočtu!)</div>
-      $$\frac{\partial L}{\partial \mathbf{z}} = \frac{1}{B}(\hat{\mathbf{y}} - \mathbf{y})$$
-      <p style="margin-top:8px; font-size:13px; color: var(--muted)">kde \(\mathbf{y}\) je one-hot vektor tříd a \(B\) je velikost dávky.</p>
-    </div>
-
-    <div class="callout tip">
-      <div class="callout-icon">✅</div>
-      <div class="callout-body"><strong>Stejný vzorec</strong> platí i pro Sigmoid + BCE: gradient vůči pre-aktivaci \(z\) je \((\hat{y} - y)/B\). Proto v implementaci přeskočíme derivaci aktivace poslední vrstvy a předáme rovnou tento gradient (<code>combined=true</code>).</div>
-    </div>
-  </section>
-
-  <!-- ── 4. Backprop ── -->
-  <section class="section" id="backprop">
-    <div class="section-header">
-      <div class="section-num">4</div>
-      <h2>Backpropagation</h2>
-    </div>
-
-    <p>Cíl: spočítat \(\frac{\partial L}{\partial W_l}\) a \(\frac{\partial L}{\partial \mathbf{b}_l}\) pro každou vrstvu. Používáme <strong>chain rule</strong> (pravidlo derivování složené funkce) — procházíme sítí od konce dopředu.</p>
-
-    <h3>Algoritmus</h3>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-content">
-          <h4>Delta výstupní vrstvy</h4>
-          <p>Pro softmax+CE nebo sigmoid+BCE: \(\boldsymbol{\delta}_L = \frac{1}{B}(\hat{\mathbf{y}} - \mathbf{y})\)</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <h4>Delta skrytých vrstev (zpětně)</h4>
-          <p>\(\boldsymbol{\delta}_l = (W_{l+1}^T \cdot \boldsymbol{\delta}_{l+1}) \odot f'(\mathbf{z}_l)\) &nbsp;&nbsp; kde \(\odot\) je Hadamardův součin (element-wise)</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <h4>Gradienty vah</h4>
-          <p>\(\frac{\partial L}{\partial W_l} = \boldsymbol{\delta}_l \cdot \mathbf{a}_{l-1}^T\) &nbsp;&nbsp; a &nbsp;&nbsp; \(\frac{\partial L}{\partial \mathbf{b}_l} = \sum_{batch} \boldsymbol{\delta}_l\)</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-content">
-          <h4>Aktualizace vah (SGD)</h4>
-          <p>\(W_l \leftarrow W_l - \alpha \cdot \frac{\partial L}{\partial W_l}\) &nbsp;&nbsp; kde \(\alpha\) je learning rate</p>
-        </div>
-      </div>
-    </div>
-
-    <h3>C++ implementace backpropu</h3>
-    <div class="code-wrap">
-      <div class="code-tabs">
-        <button class="code-tab active" onclick="switchTab(this,'cpp-bp')">C++</button>
-        <button class="code-tab" onclick="switchTab(this,'py-bp')">Python</button>
-      </div>
-      <div id="cpp-bp" class="code-panel active">
-<pre><span class="kw">for</span> (<span class="ty">int</span> l = L<span class="op">-</span><span class="num">1</span>; l <span class="op">&gt;=</span> <span class="num">0</span>; l<span class="op">--</span>) {
-    <span class="cm">// Přeskoč f'(z) pro kombinovaný gradient (softmax+CE, sigmoid+BCE)</span>
-    <span class="kw">bool</span> skip = (layer.act == Softmax) || (combined && l == L<span class="op">-</span><span class="num">1</span>);
-    <span class="kw">if</span> (<span class="op">!</span>skip)
-        delta = delta.hadamard(activation_deriv(layer.z, layer.act));
-
-    layer.dW = delta <span class="op">*</span> a_prev.T();   <span class="cm">// ∂L/∂W</span>
-    layer.db = delta.sum_cols();        <span class="cm">// ∂L/∂b</span>
-
-    <span class="kw">if</span> (l <span class="op">&gt;</span> <span class="num">0</span>) delta = layer.W.T() <span class="op">*</span> delta; <span class="cm">// propaguj zpět</span>
+    <div id="cpp-relu" class="code-panel active">
+<pre><span class="kw">inline</span> Matrix relu(<span class="kw">const</span> Matrix& z) {
+    <span class="kw">return</span> z.apply([](<span class="ty">double</span> v) { <span class="kw">return</span> std::max(<span class="num">0.0</span>, v); });
+}
+<span class="kw">inline</span> Matrix relu_deriv(<span class="kw">const</span> Matrix& z) {
+    <span class="kw">return</span> z.apply([](<span class="ty">double</span> v) { <span class="kw">return</span> v > <span class="num">0.0</span> ? <span class="num">1.0</span> : <span class="num">0.0</span>; });
 }</pre>
-      </div>
-      <div id="py-bp" class="code-panel">
-<pre><span class="cm"># PyTorch to dělá automaticky:</span>
-loss = loss_fn(output, target)
+    </div>
+    <div id="py-relu" class="code-panel">
+<pre>relu      = <span class="kw">lambda</span> z: np.maximum(<span class="num">0</span>, z)
+relu_deriv = <span class="kw">lambda</span> z: (z > <span class="num">0</span>).astype(<span class="ty">float</span>)
+<span class="cm"># PyTorch: torch.relu(z)</span></pre>
+    </div>
+  </div>
+
+  <h3>Sigmoid</h3>
+  <div class="math-block">
+    <div class="label">Definice a derivace</div>
+    $$\sigma(z) = \frac{1}{1 + e^{-z}} \in (0, 1)$$
+    $$\sigma'(z) = \sigma(z)\,(1 - \sigma(z))$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Důkaz derivace: \(\frac{d}{dz}\frac{1}{1+e^{-z}} = \frac{e^{-z}}{(1+e^{-z})^2} = \sigma(z)(1-\sigma(z))\)</p>
+  </div>
+  <p><strong>Použití:</strong> Výstupní vrstva binární klasifikace — výstup interpretujeme jako \(P(\text{třída}=1)\).</p>
+  <p><strong>Nevýhoda:</strong> Saturace pro velká \(|z|\) → gradient blízký 0 → <em>vanishing gradient</em> v hlubokých sítích.</p>
+
+  <h3>Tanh</h3>
+  <div class="math-block">
+    <div class="label">Definice a derivace</div>
+    $$\tanh(z) = \frac{e^z - e^{-z}}{e^z + e^{-z}} = 2\sigma(2z) - 1 \in (-1, 1)$$
+    $$\tanh'(z) = 1 - \tanh^2(z)$$
+  </div>
+  <p>Výstup je symetrický kolem 0 — v praxi konverguje lépe než Sigmoid pro skryté vrstvy, ale stále trpí saturací.</p>
+
+  <h3>Softmax</h3>
+  <div class="math-block">
+    <div class="label">Definice — víc-třídní klasifikace</div>
+    $$\text{softmax}(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{K} e^{z_j}}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Výstup je pravděpodobnostní distribuce: \(\sum_i \text{softmax}(z_i) = 1\), každá hodnota \(\in (0,1)\).</p>
+  </div>
+  <p><strong>Numerická stabilita:</strong> Pro velká \(z_i\) exploduje \(e^{z_i}\). Řešení: odečíst maximum před exponenciálou — výsledek se nemění:</p>
+  <div class="math-block">
+    <div class="label">Numericky stabilní verze</div>
+    $$\text{softmax}(z_i) = \frac{e^{z_i - \max(\mathbf{z})}}{\sum_j e^{z_j - \max(\mathbf{z})}}$$
+  </div>
+
+  <div class="code-wrap">
+    <div class="code-tabs">
+      <button class="code-tab active" onclick="switchTab(this,'cpp-softmax')">C++</button>
+      <button class="code-tab" onclick="switchTab(this,'py-softmax')">Python</button>
+    </div>
+    <div id="cpp-softmax" class="code-panel active">
+<pre><span class="kw">for</span> (<span class="ty">int</span> j = <span class="num">0</span>; j < z.cols; j++) {
+    <span class="ty">double</span> maxv = *std::max_element(...); <span class="cm">// max v sloupci</span>
+    <span class="ty">double</span> sumexp = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i < z.rows; i++) sumexp += exp(z.at(i,j) - maxv);
+    <span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i < z.rows; i++)
+        result.at(i,j) = exp(z.at(i,j) - maxv) / sumexp;
+}</pre>
+    </div>
+    <div id="py-softmax" class="code-panel">
+<pre><span class="kw">def</span> softmax(z):           <span class="cm"># z: (B × K)</span>
+    z -= z.max(axis=<span class="num">1</span>, keepdims=<span class="kw">True</span>)  <span class="cm"># numerická stabilita</span>
+    e = np.exp(z)
+    <span class="kw">return</span> e / e.sum(axis=<span class="num">1</span>, keepdims=<span class="kw">True</span>)</pre>
+    </div>
+  </div>
+
+  <h3>Přehled — kdy použít co</h3>
+  <table>
+    <thead><tr><th>Funkce</th><th>Rozsah</th><th>Kde použít</th><th>Problém</th></tr></thead>
+    <tbody>
+      <tr><td><strong>ReLU</strong></td><td>\([0, \infty)\)</td><td>Skryté vrstvy</td><td>Dying ReLU</td></tr>
+      <tr><td><strong>Sigmoid</strong></td><td>\((0, 1)\)</td><td>Binární klasifikace (výstup)</td><td>Vanishing gradient</td></tr>
+      <tr><td><strong>Tanh</strong></td><td>\((-1, 1)\)</td><td>Skryté vrstvy (RNN)</td><td>Vanishing gradient</td></tr>
+      <tr><td><strong>Softmax</strong></td><td>\((0,1)\), součet=1</td><td>Víc-třídní klasifikace (výstup)</td><td>—</td></tr>
+      <tr><td><strong>Linear</strong></td><td>\((-\infty, \infty)\)</td><td>Regrese (výstup)</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     3. LOSS FUNKCE
+══════════════════════════════════════════════════════════ -->
+<section class="section" id="loss">
+  <div class="section-header"><div class="section-num">3</div><h2>Loss funkce</h2></div>
+
+  <p>Loss funkce \(\mathcal{L}(\hat{\mathbf{y}}, \mathbf{y})\) měří rozdíl mezi predikcí \(\hat{\mathbf{y}}\) a skutečností \(\mathbf{y}\). Trénink = minimalizace loss pomocí gradientního sestupu.</p>
+
+  <h3>MSE — Mean Squared Error (pro regresi)</h3>
+  <div class="math-block">
+    <div class="label">Definice</div>
+    $$\mathcal{L}_{MSE} = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2$$
+  </div>
+  <p><strong>Proč MSE?</strong> Penalizuje velké odchylky kvadraticky — chyba 2× větší = penalizace 4× větší. Výsledkem je, že síť se snaží přiblížit zejména k nejhorším případům.</p>
+  <div class="math-block">
+    <div class="label">Gradient MSE vůči predikci</div>
+    $$\frac{\partial \mathcal{L}}{\partial \hat{y}_i} = \frac{2}{n}(\hat{y}_i - y_i)$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Znaménko: pokud \(\hat{y}_i > y_i\), gradient je kladný → parametry se posunou tak, aby \(\hat{y}_i\) kleslo. ✓</p>
+  </div>
+
+  <h3>Cross-Entropy (pro klasifikaci)</h3>
+  <p>Motivace: chceme maximalizovat log-likelihood správné třídy. CE loss je negativní log-likelihood:</p>
+  <div class="math-block">
+    <div class="label">Cross-Entropy pro jeden vzorek (K tříd)</div>
+    $$\mathcal{L}_{CE} = -\sum_{c=1}^{K} y_c \log(\hat{y}_c)$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Kde \(\mathbf{y}\) je one-hot vektor: \(y_c = 1\) pro správnou třídu, \(y_c = 0\) jinak. Tedy \(\mathcal{L}_{CE} = -\log(\hat{y}_{správná\_třída})\).</p>
+  </div>
+  <p><strong>Intuice:</strong> Pokud síť přiřadí správné třídě pravděpodobnost 1 → \(-\log(1) = 0\) (žádná ztráta). Pokud přiřadí 0.01 → \(-\log(0.01) \approx 4.6\) (velká ztráta).</p>
+
+  <h3>Kombinovaný gradient Softmax + Cross-Entropy</h3>
+  <p>Výpočet derivace softmax + CE zvlášť je komplikovaný. Při jejich kombinaci se gradient vůči pre-aktivaci \(\mathbf{z}\) zjednodušší elegantně:</p>
+  <div class="math-block">
+    <div class="label">Odvození — chain rule přes softmax</div>
+    $$\frac{\partial \mathcal{L}}{\partial z_i} = \sum_j \frac{\partial \mathcal{L}}{\partial \hat{y}_j} \cdot \frac{\partial \hat{y}_j}{\partial z_i}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:6px">Jacobián softmax: \(\frac{\partial \hat{y}_j}{\partial z_i} = \hat{y}_j(\delta_{ij} - \hat{y}_i)\) &nbsp;(kde \(\delta_{ij}\) je Kroneckerovo delta)</p>
+    $$\frac{\partial \mathcal{L}}{\partial z_i} = \hat{y}_i - y_i$$
+    <p style="font-size:13px;color:var(--green);margin-top:8px">✓ Výsledek je extrémně jednoduchý: gradient = (predikce − skutečnost)</p>
+  </div>
+  <p>Pro celou dávku \(B\) vzorků průměrujeme:</p>
+  <div class="math-block">
+    $$\frac{\partial \mathcal{L}}{\partial Z} = \frac{1}{B}(\hat{Y} - Y)$$
+  </div>
+
+  <h3>Binary Cross-Entropy (binární klasifikace)</h3>
+  <div class="math-block">
+    <div class="label">BCE — jeden výstupní neuron se sigmoidem</div>
+    $$\mathcal{L}_{BCE} = -\frac{1}{n}\sum_{i=1}^{n}\bigl[y_i \log(\hat{y}_i) + (1-y_i)\log(1-\hat{y}_i)\bigr]$$
+  </div>
+  <p>Stejně jako u softmax+CE se gradient sigmoid+BCE vůči \(z\) zjednodušší:</p>
+  <div class="math-block">
+    $$\frac{\partial \mathcal{L}}{\partial z_i} = \frac{1}{n}(\hat{y}_i - y_i)$$
+  </div>
+
+  <div class="callout tip">
+    <div class="callout-icon">✅</div>
+    <div class="callout-body"><strong>Klíčový trik v implementaci:</strong> Pro softmax+CE i sigmoid+BCE předáváme do backpropu rovnou gradient vůči \(z\) (ne vůči \(\hat{y}\)). Tím přeskočíme derivaci aktivace v poslední vrstvě (<code>combined=true</code> v našem kódu).</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     4. BACKPROPAGATION
+══════════════════════════════════════════════════════════ -->
+<section class="section" id="backprop">
+  <div class="section-header"><div class="section-num">4</div><h2>Backpropagation</h2></div>
+
+  <p>Backpropagation je efektivní algoritmus pro výpočet gradientu loss vůči všem parametrům sítě. Využívá <strong>chain rule</strong> (derivaci složené funkce) a sdílí mezivýpočty mezi vrstvami.</p>
+
+  <h3>Chain rule — základ backpropu</h3>
+  <p>Pro složenou funkci \(f(g(x))\) platí:</p>
+  <div class="math-block">
+    $$\frac{df}{dx} = \frac{df}{dg} \cdot \frac{dg}{dx}$$
+  </div>
+  <p>V síti je loss \(\mathcal{L}\) složenou funkcí přes všechny vrstvy. Gradient se šíří od výstupu zpět ke vstupu — proto <em>back</em>propagation.</p>
+
+  <h3>Definice delta (chybový signál)</h3>
+  <p>Pro vrstvu \(l\) definujeme <strong>delta</strong> jako gradient loss vůči pre-aktivaci \(\mathbf{z}^{(l)}\):</p>
+  <div class="math-block">
+    $$\boldsymbol{\delta}^{(l)} = \frac{\partial \mathcal{L}}{\partial \mathbf{z}^{(l)}}$$
+  </div>
+
+  <h3>Krok 1 — Delta výstupní vrstvy</h3>
+  <div class="math-block">
+    <div class="label">Výstupní vrstva L</div>
+    $$\boldsymbol{\delta}^{(L)} = \frac{\partial \mathcal{L}}{\partial \mathbf{a}^{(L)}} \odot f'^{(L)}(\mathbf{z}^{(L)})$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">\(\odot\) = Hadamardův součin (element-wise násobení)</p>
+  </div>
+  <p>Pro softmax+CE je \(\boldsymbol{\delta}^{(L)} = \frac{1}{B}(\hat{Y} - Y)\) přímo (přeskočíme \(f'\)).</p>
+
+  <h3>Krok 2 — Zpětné šíření delty</h3>
+  <div class="math-block">
+    <div class="label">Skrytá vrstva l (odvozeno chain rule)</div>
+    $$\boldsymbol{\delta}^{(l)} = \left({W^{(l+1)}}^T \cdot \boldsymbol{\delta}^{(l+1)}\right) \odot f'^{(l)}(\mathbf{z}^{(l)})$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Intuice: chybový signál z vrstvy \(l+1\) se "přenásobí zpátky" přes transponované váhy, pak se vyfiltruje derivací aktivace.</p>
+  </div>
+
+  <h3>Krok 3 — Gradienty parametrů</h3>
+  <div class="math-block">
+    <div class="label">Gradient vah a biasů</div>
+    $$\frac{\partial \mathcal{L}}{\partial W^{(l)}} = \boldsymbol{\delta}^{(l)} \cdot \left(\mathbf{a}^{(l-1)}\right)^T$$
+    $$\frac{\partial \mathcal{L}}{\partial \mathbf{b}^{(l)}} = \sum_{batch} \boldsymbol{\delta}^{(l)}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Pro dávku \(B\) vzorků: \(\boldsymbol{\delta}\) má tvar \((n_{out} \times B)\), \(\mathbf{a}^{(l-1)}\) má tvar \((n_{in} \times B)\). Součin dá průměrný gradient.</p>
+  </div>
+
+  <h3>Úplný algoritmus</h3>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-content">
+      <h4>Forward pass</h4>
+      <p>Vypočítej a ulož \(\mathbf{z}^{(l)}\) a \(\mathbf{a}^{(l)}\) pro každou vrstvu — potřebujeme je při backpropu.</p>
+    </div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-content">
+      <h4>Loss</h4>
+      <p>Vypočítej \(\mathcal{L}(\hat{\mathbf{y}}, \mathbf{y})\) a gradient \(\frac{\partial \mathcal{L}}{\partial \hat{\mathbf{y}}}\) nebo \(\frac{\partial \mathcal{L}}{\partial \mathbf{z}^{(L)}}\).</p>
+    </div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-content">
+      <h4>Backward pass (od L zpět k 1)</h4>
+      <p>Pro každou vrstvu: spočítej \(\boldsymbol{\delta}^{(l)}\), pak \(\frac{\partial \mathcal{L}}{\partial W^{(l)}}\) a \(\frac{\partial \mathcal{L}}{\partial \mathbf{b}^{(l)}}\).</p>
+    </div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-content">
+      <h4>Aktualizace parametrů</h4>
+      <p>\(W^{(l)} \leftarrow W^{(l)} - \alpha \cdot \frac{\partial \mathcal{L}}{\partial W^{(l)}}\) &nbsp; (SGD nebo Adam)</p>
+    </div></div>
+  </div>
+
+  <h3>C++ implementace</h3>
+  <div class="code-wrap">
+    <div class="code-tabs">
+      <button class="code-tab active" onclick="switchTab(this,'cpp-bp')">C++</button>
+      <button class="code-tab" onclick="switchTab(this,'py-bp')">Python / PyTorch</button>
+    </div>
+    <div id="cpp-bp" class="code-panel active">
+<pre><span class="kw">void</span> backward(<span class="kw">const</span> Matrix& x, <span class="kw">const</span> Matrix& grad, <span class="ty">bool</span> combined) {
+    Matrix delta = grad;
+    <span class="kw">for</span> (<span class="ty">int</span> l = L<span class="op">-</span><span class="num">1</span>; l >= <span class="num">0</span>; l<span class="op">--</span>) {
+        <span class="cm">// Přeskoč f'(z) pokud jde o kombinovaný gradient</span>
+        <span class="ty">bool</span> skip = (act == Softmax) || (combined && l == L<span class="op">-</span><span class="num">1</span>);
+        <span class="kw">if</span> (<span class="op">!</span>skip)
+            delta = delta.hadamard(activation_deriv(layers[l].z, act));
+
+        layers[l].dW = delta <span class="op">*</span> a_prev.T();  <span class="cm">// ∂L/∂W</span>
+        layers[l].db = delta.sum_cols();     <span class="cm">// ∂L/∂b</span>
+
+        <span class="kw">if</span> (l > <span class="num">0</span>) delta = layers[l].W.T() <span class="op">*</span> delta;
+    }
+}</pre>
+    </div>
+    <div id="py-bp" class="code-panel">
+<pre><span class="cm"># PyTorch řeší backprop automaticky přes autograd</span>
+y_hat = model(X_batch)
+loss  = loss_fn(y_hat, Y_batch)
 optimizer.zero_grad()
-loss.backward()   <span class="cm"># PyTorch spočítá všechny ∂L/∂W</span>
-optimizer.step()  <span class="cm"># W -= lr * ∂L/∂W</span></pre>
-      </div>
+loss.backward()    <span class="cm"># spočítá ∂L/∂W pro každou vrstvu</span>
+optimizer.step()   <span class="cm"># aktualizuje W</span></pre>
     </div>
+  </div>
 
-    <div class="callout info">
-      <div class="callout-icon">🔍</div>
-      <div class="callout-body"><strong>Gradient check:</strong> Numerický gradient \(\approx \frac{L(W+\epsilon) - L(W-\epsilon)}{2\epsilon}\) by se měl shodovat s analytickým. Relativní chyba &lt; 1e-5 = implementace je správná.</div>
+  <div class="callout info">
+    <div class="callout-icon">🔍</div>
+    <div class="callout-body"><strong>Gradient check:</strong> Ověření správnosti backpropu numericky: \(\frac{\partial \mathcal{L}}{\partial W_{ij}} \approx \frac{\mathcal{L}(W_{ij}+\varepsilon) - \mathcal{L}(W_{ij}-\varepsilon)}{2\varepsilon}\). Relativní chyba &lt; 10⁻⁵ = implementace je správná. Náš C++ kód má relativní chybu 8×10⁻⁸. ✓</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     5. SGD vs ADAM
+══════════════════════════════════════════════════════════ -->
+<section class="section" id="optimizer">
+  <div class="section-header"><div class="section-num">5</div><h2>SGD vs Adam</h2></div>
+
+  <p>Optimizer určuje, jak se parametry aktualizují na základě gradientu. Základní volba je SGD, v praxi Adam konverguje rychleji.</p>
+
+  <h3>Gradient Descent</h3>
+  <p>Základní myšlenka: pohyb po povrchu loss funkce ve směru záporného gradientu (kopec dolů).</p>
+  <div class="math-block">
+    <div class="label">Vanilla gradient descent</div>
+    $$\theta \leftarrow \theta - \alpha \cdot \nabla_\theta \mathcal{L}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">\(\alpha\) = learning rate (krok). Příliš velký → divergence. Příliš malý → pomalá konvergence.</p>
+  </div>
+
+  <h3>SGD — Stochastic Gradient Descent</h3>
+  <p>Namísto gradientu přes celý dataset počítáme gradient přes náhodnou <strong>mini-dávku</strong> (batch) \(B\) vzorků:</p>
+  <div class="math-block">
+    $$\theta \leftarrow \theta - \alpha \cdot \frac{1}{B}\sum_{i \in \text{batch}} \nabla_\theta \mathcal{L}(x_i, y_i)$$
+  </div>
+  <p><strong>Výhoda:</strong> Šum v gradientu pomáhá uniknout z lokálních minim a sedlových bodů. <strong>Nevýhoda:</strong> Citlivý na learning rate, pomalý na plochých dimenzích.</p>
+
+  <h3>SGD s momentem</h3>
+  <p>Přidáme klouzavý průměr gradientů — "setrvačnost" pohybu pomáhá překonat lokální nerovnosti:</p>
+  <div class="math-block">
+    $$v_t = \mu v_{t-1} + \alpha \nabla_\theta \mathcal{L}$$
+    $$\theta \leftarrow \theta - v_t$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">\(\mu \approx 0.9\) = koeficient momentu. PyTorch defaultně používá momentum v SGD.</p>
+  </div>
+
+  <h3>Adam — Adaptive Moment Estimation</h3>
+  <p>Adam udržuje <strong>adaptivní learning rate</strong> pro každý parametr zvlášť. Parametry s historicky velkými gradienty dostávají menší update — a naopak.</p>
+  <div class="math-block">
+    <div class="label">Adam update (Kingma & Ba, 2015) — krok t</div>
+    $$m_t = \beta_1 m_{t-1} + (1-\beta_1)\, g_t \qquad \text{(1. moment — klouzavý průměr \(g\))}$$
+    $$v_t = \beta_2 v_{t-1} + (1-\beta_2)\, g_t^2 \qquad \text{(2. moment — klouzavý průměr \(g^2\))}$$
+    $$\hat{m}_t = \frac{m_t}{1 - \beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1 - \beta_2^t} \qquad \text{(bias correction — prvních pár kroků)}$$
+    $$\theta_t = \theta_{t-1} - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \varepsilon}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Výchozí hodnoty: \(\beta_1 = 0.9\), \(\beta_2 = 0.999\), \(\varepsilon = 10^{-8}\), \(\alpha = 0.001\).</p>
+  </div>
+
+  <p><strong>Intuice:</strong> \(\hat{m}_t / \sqrt{\hat{v}_t}\) normalizuje gradient jeho historickou velikostí. Parametr, který osciluje (velké \(v\)), dostane malý update. Parametr, který konzistentně míří jedním směrem (velké \(m\), malé \(v\)), dostane velký update.</p>
+
+  <div class="code-wrap">
+    <div class="code-tabs">
+      <button class="code-tab active" onclick="switchTab(this,'cpp-adam')">C++</button>
+      <button class="code-tab" onclick="switchTab(this,'py-adam')">Python / PyTorch</button>
     </div>
-  </section>
-
-  <!-- ── 5. Optimizery ── -->
-  <section class="section" id="optimizer">
-    <div class="section-header">
-      <div class="section-num">5</div>
-      <h2>SGD vs Adam</h2>
+    <div id="cpp-adam" class="code-panel active">
+<pre><span class="kw">void</span> update_adam() {
+    adam_step++;
+    <span class="ty">double</span> bc1 = <span class="num">1.0</span> <span class="op">-</span> pow(b1, adam_step);  <span class="cm">// 1 - β₁ᵗ</span>
+    <span class="ty">double</span> bc2 = <span class="num">1.0</span> <span class="op">-</span> pow(b2, adam_step);  <span class="cm">// 1 - β₂ᵗ</span>
+    <span class="kw">for</span> (<span class="kw">auto</span>& layer : layers) {
+        <span class="kw">for</span> (<span class="ty">int</span> i = <span class="num">0</span>; i < nW; i++) {
+            <span class="ty">double</span> g = layer.dW.data[i];
+            layer.mW.data[i] = b1<span class="op">*</span>layer.mW.data[i] + (<span class="num">1</span><span class="op">-</span>b1)<span class="op">*</span>g;    <span class="cm">// m</span>
+            layer.vW.data[i] = b2<span class="op">*</span>layer.vW.data[i] + (<span class="num">1</span><span class="op">-</span>b2)<span class="op">*</span>g<span class="op">*</span>g; <span class="cm">// v</span>
+            <span class="ty">double</span> mh = layer.mW.data[i] / bc1;  <span class="cm">// m̂</span>
+            <span class="ty">double</span> vh = layer.vW.data[i] / bc2;  <span class="cm">// v̂</span>
+            layer.W.data[i] <span class="op">-=</span> lr <span class="op">*</span> mh / (sqrt(vh) + eps);
+        }
+    }
+}</pre>
     </div>
-
-    <h3>SGD (Stochastic Gradient Descent)</h3>
-    <div class="math-block">
-      <div class="label">Aktualizace</div>
-      $$\theta \leftarrow \theta - \alpha \cdot \nabla_\theta L$$
+    <div id="py-adam" class="code-panel">
+<pre><span class="cm"># PyTorch — jedna řádka</span>
+optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=<span class="num">0.001</span>, betas=(<span class="num">0.9</span>, <span class="num">0.999</span>), eps=<span class="num">1e-8</span>
+)</pre>
     </div>
-    <p>Jednoduchý, předvídatelný. Potřebuje vyladit learning rate. Pro komplexní problémy konverguje pomalu.</p>
+  </div>
 
-    <h3>Adam (Adaptive Moment Estimation)</h3>
-    <p>Udržuje <strong>adaptivní learning rate</strong> pro každý parametr zvlášť — parametry s velkými gradienty dostávají menší aktualizace.</p>
+  <table>
+    <thead><tr><th>Vlastnost</th><th>SGD</th><th>SGD+momentum</th><th>Adam</th></tr></thead>
+    <tbody>
+      <tr><td>Výchozí lr</td><td>0.01–0.1</td><td>0.01–0.1</td><td>0.001</td></tr>
+      <tr><td>Citlivost na lr</td><td>Vysoká</td><td>Střední</td><td>Nízká</td></tr>
+      <tr><td>Rychlost konvergence</td><td>Pomalá</td><td>Střední</td><td>Rychlá</td></tr>
+      <tr><td>Paměť navíc</td><td>Žádná</td><td>\(|\theta|\)</td><td>\(2|\theta|\)</td></tr>
+      <tr><td>Ideální pro</td><td>Jednoduché úlohy</td><td>Počítačové vidění</td><td>Experimenty, NLP</td></tr>
+    </tbody>
+  </table>
+</section>
 
-    <div class="math-block">
-      <div class="label">Adam update (Kingma & Ba, 2015)</div>
-      $$m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t \quad \text{(1. moment = klouzavý průměr)}$$
-      $$v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2 \quad \text{(2. moment = klouzavý průměr g²)}$$
-      $$\hat{m}_t = \frac{m_t}{1-\beta_1^t}, \quad \hat{v}_t = \frac{v_t}{1-\beta_2^t} \quad \text{(bias correction)}$$
-      $$\theta_t = \theta_{t-1} - \alpha \cdot \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \varepsilon}$$
+<!-- ══════════════════════════════════════════════════════════
+     6. INICIALIZACE VAH
+══════════════════════════════════════════════════════════ -->
+<section class="section" id="inicializace">
+  <div class="section-header"><div class="section-num">6</div><h2>Inicializace vah</h2></div>
+
+  <p>Inicializace vah je kritická — špatná volba způsobuje <em>vanishing</em> nebo <em>exploding gradients</em> a trénink vůbec nezačne konvergovat.</p>
+
+  <h3>Proč ne nuly?</h3>
+  <p>Pokud \(W = 0\), všechny neurony ve vrstvě počítají totéž. Gradienty jsou identické → všechny neurony se aktualizují stejně → <strong>symetrie se nikdy nerozbije</strong>. Síť se chová jako síť s jedním neuronem ve vrstvě.</p>
+
+  <h3>Analýza rozptylu signálu</h3>
+  <p>Chceme, aby rozptyl signálu \(\text{Var}[\mathbf{a}^{(l)}]\) byl přibližně stejný v každé vrstvě — jinak signál buď exploduje nebo mizí.</p>
+  <p>Pro vrstvu s \(n_{in}\) vstupními neurony a váhami \(W_{ij} \sim \mathcal{D}(0, \sigma^2)\):</p>
+  <div class="math-block">
+    $$\text{Var}[z_i] = n_{in} \cdot \sigma^2 \cdot \text{Var}[a_j]$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Aby \(\text{Var}[z] = \text{Var}[a]\), potřebujeme \(\sigma^2 = \frac{1}{n_{in}}\).</p>
+  </div>
+
+  <h3>Xavier / Glorot inicializace</h3>
+  <p>Navržena pro Sigmoid a Tanh — bere v úvahu obě směry (forward i backward):</p>
+  <div class="math-block">
+    <div class="label">Xavier uniform</div>
+    $$W_{ij} \sim \mathcal{U}\!\left(-\sqrt{\frac{6}{n_{in}+n_{out}}},\; +\sqrt{\frac{6}{n_{in}+n_{out}}}\right)$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Splňuje \(\text{Var}[W] = \frac{2}{n_{in}+n_{out}}\) — kompromis mezi zachováním rozptylu ve forward a backward průchodu.</p>
+  </div>
+
+  <h3>He inicializace</h3>
+  <p>Navržena pro ReLU — protože ReLU "zabíjí" zápornou polovinu, potřebujeme 2× větší rozptyl:</p>
+  <div class="math-block">
+    <div class="label">He (Kaiming) normal</div>
+    $$W_{ij} \sim \mathcal{N}\!\left(0,\; \sqrt{\frac{2}{n_{in}}}\right)$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Faktor 2 kompenzuje to, že ReLU v průměru "propustí" jen polovinu hodnot (\(\mathbb{E}[\text{ReLU}^2] \approx \frac{1}{2}\mathbb{E}[z^2]\)).</p>
+  </div>
+
+  <table>
+    <thead><tr><th>Inicializace</th><th>Aktivace</th><th>Vzorec \(\sigma^2\)</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Xavier</strong></td><td>Sigmoid, Tanh, Linear</td><td>\(\frac{2}{n_{in}+n_{out}}\)</td></tr>
+      <tr><td><strong>He</strong></td><td>ReLU, Leaky ReLU</td><td>\(\frac{2}{n_{in}}\)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>Biasy</strong> inicializujeme na nulu — to je v pořádku, protože váhy W zajistí rozbití symetrie. Bias 0 je neutrální výchozí bod.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════
+     7. TRÉNINK V PRAXI
+══════════════════════════════════════════════════════════ -->
+<section class="section" id="trenovani">
+  <div class="section-header"><div class="section-num">7</div><h2>Trénink v praxi</h2></div>
+
+  <h3>Kompletní trénovací smyčka</h3>
+  <pre class="solo"><span class="kw">for</span> epocha = 1..N:
+    zamíchej trénovací data              <span class="cm">// každou epochu jiné pořadí</span>
+    <span class="kw">for</span> dávka in mini_batches(X_train, Y_train, batch_size):
+        ŷ    = forward(X_batch)          <span class="cm">// 1. forward pass</span>
+        L    = loss_fn(ŷ, Y_batch)       <span class="cm">// 2. loss</span>
+        grad = grad_fn(ŷ, Y_batch)       <span class="cm">// 3. gradient loss</span>
+        backward(X_batch, grad)          <span class="cm">// 4. backprop → ∂L/∂W</span>
+        update()                         <span class="cm">// 5. W -= lr * ∂L/∂W  (SGD/Adam)</span>
+    val_loss = evaluate(X_val, Y_val)    <span class="cm">// validace po každé epoše</span>
+    <span class="kw">if</span> val_loss nezlepšuje patience epoch: break  <span class="cm">// early stopping</span></pre>
+
+  <h3>Normalizace vstupů (z-score)</h3>
+  <p>Sítě konvergují rychleji a spolehlivěji, pokud mají všechny vstupní features podobnou škálu:</p>
+  <div class="math-block">
+    <div class="label">Standardizace</div>
+    $$x'_i = \frac{x_i - \mu_i}{\sigma_i}$$
+    <p style="font-size:13px;color:var(--muted);margin-top:8px">Výsledek: každá feature má přibližně \(\mu = 0\), \(\sigma = 1\).</p>
+  </div>
+  <div class="callout warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-body"><strong>Kritické pravidlo:</strong> \(\mu\) a \(\sigma\) počítej VÝHRADNĚ z trénovacích dat. Validační a testovací data normalizuj STEJNÝMI hodnotami. Jinak dochází k <em>data leakage</em>.</div>
+  </div>
+
+  <h3>Train / Validation / Test split</h3>
+  <table>
+    <thead><tr><th>Sada</th><th>Účel</th><th>Typická velikost</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Train</strong></td><td>Trénink — síť vidí tato data</td><td>70–80 %</td></tr>
+      <tr><td><strong>Validation</strong></td><td>Ladění hyperparametrů, early stopping</td><td>10–20 %</td></tr>
+      <tr><td><strong>Test</strong></td><td>Finální vyhodnocení — <em>jednou</em> na konci</td><td>10–20 %</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Early stopping</h3>
+  <p>Nejjednodušší ochrana před overfittingem: sleduj validační loss a zastav trénink, pokud se \(P\) epoch nezlepší.</p>
+  <pre class="solo">best_val_loss = ∞
+no_improve    = 0
+<span class="kw">for</span> epoch in epochs:
+    train(...)
+    val_loss = evaluate(X_val, Y_val)
+    <span class="kw">if</span> val_loss < best_val_loss - ε:
+        best_val_loss = val_loss
+        ulož váhy                        <span class="cm">// uložíme nejlepší model</span>
+        no_improve = 0
+    <span class="kw">else</span>:
+        no_improve += 1
+        <span class="kw">if</span> no_improve >= patience: break
+načti nejlepší váhy                      <span class="cm">// použij model z nejlepší epochy</span></pre>
+
+  <h3>Overfitting vs Underfitting</h3>
+  <table>
+    <thead><tr><th>Problém</th><th>Příznaky</th><th>Řešení</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Underfitting</strong></td><td>Vysoká train i val loss</td><td>Větší síť, více epoch, nižší regularizace</td></tr>
+      <tr><td><strong>Overfitting</strong></td><td>Nízká train, vysoká val loss</td><td>Dropout, L2 regularizace, více dat, early stopping</td></tr>
+      <tr><td><strong>Správně</strong></td><td>Train ≈ val loss, obě klesají</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Přehled hyperparametrů</h3>
+  <table>
+    <thead><tr><th>Hyperparametr</th><th>Typická hodnota</th><th>Vliv při změně</th></tr></thead>
+    <tbody>
+      <tr><td>Learning rate (SGD)</td><td>0.01–0.1</td><td>Příliš velký → divergence; příliš malý → pomalé</td></tr>
+      <tr><td>Learning rate (Adam)</td><td>0.001</td><td>Robustní, málokdy potřeba měnit</td></tr>
+      <tr><td>Batch size</td><td>32–256</td><td>Větší = stabilnější gradient, ale pomalejší epoch</td></tr>
+      <tr><td>Epochy</td><td>10–1000</td><td>Závisí na datasetu — použij early stopping</td></tr>
+      <tr><td>Neurony / vrstva</td><td>32–512</td><td>Kapacita sítě — více = silnější, ale overfitting</td></tr>
+      <tr><td>Počet vrstev</td><td>2–5</td><td>Hloubka reprezentace — hluboké sítě = složitější vzory</td></tr>
+      <tr><td>Patience</td><td>10–100</td><td>Jak dlouho čekáme před early stopping</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout tip">
+    <div class="callout-icon">✅</div>
+    <div class="callout-body"><strong>Postup při ladění:</strong> 1) Ověř, že síť dokáže přetrénovat malý dataset (ztráta → 0). 2) Přidej více dat nebo regularizaci. 3) Lad hyperparametry systematicky, vždy jednu věc najednou.</div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── Příklady A/B/C ── -->
+<section class="section" id="regrese">
+  <div class="section-header"><div class="section-num">A</div><h2>Příklad: Regrese</h2></div>
+  <p>Aproximace funkce \(y = \sin(2\pi x) + \varepsilon\), kde \(\varepsilon \sim \mathcal{N}(0, 0.1)\).</p>
+  <table>
+    <thead><tr><th>Vlastnost</th><th>Hodnota</th></tr></thead>
+    <tbody>
+      <tr><td>Architektura</td><td>1 → 32 → 32 → 1</td></tr>
+      <tr><td>Aktivace</td><td>ReLU, ReLU, Linear</td></tr>
+      <tr><td>Loss</td><td>MSE</td></tr>
+      <tr><td>Optimizer</td><td>SGD, lr=0.01, batch=64</td></tr>
+      <tr><td>Výsledek C++</td><td>Test MSE ≈ 0.166</td></tr>
+      <tr><td>Výsledek PyTorch</td><td>Test MSE ≈ 0.017</td></tr>
+    </tbody>
+  </table>
+  <div class="code-wrap">
+    <div class="code-tabs">
+      <button class="code-tab active" onclick="switchTab(this,'cpp-reg')">C++</button>
+      <button class="code-tab" onclick="switchTab(this,'py-reg')">Python / PyTorch</button>
     </div>
-
-    <table>
-      <thead><tr><th>Vlastnost</th><th>SGD</th><th>Adam</th></tr></thead>
-      <tbody>
-        <tr><td>Výchozí lr</td><td>0.01–0.1</td><td>0.001</td></tr>
-        <tr><td>Ladění lr</td><td>Citlivé</td><td>Robustní</td></tr>
-        <tr><td>Rychlost</td><td>Pomalejší</td><td>Rychlejší na začátku</td></tr>
-        <tr><td>Generalizace</td><td>Często lepší</td><td>Může přefitovat</td></tr>
-        <tr><td>Parametry β</td><td>—</td><td>β₁=0.9, β₂=0.999</td></tr>
-      </tbody>
-    </table>
-
-    <div class="callout tip">
-      <div class="callout-icon">✅</div>
-      <div class="callout-body"><strong>Praktické doporučení:</strong> Adam pro rychlý vývoj a experimenty. SGD s momentum pro finální trénink (zejm. v počítačovém vidění).</div>
-    </div>
-  </section>
-
-  <!-- ── 6. Inicializace ── -->
-  <section class="section" id="inicializace">
-    <div class="section-header">
-      <div class="section-num">6</div>
-      <h2>Inicializace vah</h2>
-    </div>
-
-    <p>Inicializace vah je kritická. Příliš malé váhy → zmizení gradientu. Příliš velké → explodování gradientu. Nulové váhy → všechny neurony se naučí totéž (symetrie).</p>
-
-    <div class="math-block">
-      <div class="label">Xavier / Glorot inicializace — pro Sigmoid, Tanh</div>
-      $$W \sim \mathcal{U}\!\left(-\sqrt{\frac{6}{n_{in}+n_{out}}},\; +\sqrt{\frac{6}{n_{in}+n_{out}}}\right)$$
-    </div>
-
-    <div class="math-block">
-      <div class="label">He inicializace — pro ReLU</div>
-      $$W \sim \mathcal{N}\!\left(0,\; \sqrt{\frac{2}{n_{in}}}\right)$$
-      <p style="margin-top:8px; font-size:13px; color:var(--muted)">Faktor 2 kompenzuje to, že ReLU "zabíjí" polovinu neuronů (záporné hodnoty → 0).</p>
-    </div>
-  </section>
-
-  <!-- ── 7. Trénink v praxi ── -->
-  <section class="section" id="trenovani">
-    <div class="section-header">
-      <div class="section-num">7</div>
-      <h2>Trénink v praxi</h2>
-    </div>
-
-    <h3>Kompletní trénovací smyčka</h3>
-    <div class="code-wrap">
-      <pre class="solo"><span class="kw">for</span> epocha = <span class="num">1</span>..<span class="num">N</span>:
-    zamíchej data                            <span class="cm">// lepší generalizace</span>
-    <span class="kw">for</span> dávka in batches:
-        ŷ  = forward(X_batch)               <span class="cm">// 1. forward pass</span>
-        L  = loss(ŷ, Y_batch)               <span class="cm">// 2. loss</span>
-        g  = grad_fn(ŷ, Y_batch)            <span class="cm">// 3. gradient loss</span>
-        backward(X_batch, g)                <span class="cm">// 4. backprop → ∂L/∂W</span>
-        update()                            <span class="cm">// 5. W -= lr * ∂L/∂W</span>
-    vypiš průměrnou loss                    <span class="cm">// monitoring</span></pre>
-    </div>
-
-    <h3>Normalizace vstupů (z-score)</h3>
-    <div class="math-block">
-      <div class="label">Standardizace</div>
-      $$x' = \frac{x - \mu}{\sigma}$$
-      <p style="margin-top:8px; font-size:13px; color:var(--muted)">⚠️ μ a σ počítej POUZE z trénovacích dat. Validační/testovací data normalizuj stejnými hodnotami.</p>
-    </div>
-
-    <h3>Early stopping</h3>
-    <p>Sleduj validační loss. Pokud se <strong>patience</strong> epoch nezlepší → zastav trénink a načti nejlepší váhy. Jednoduchá a účinná ochrana před overfittingem.</p>
-
-    <div class="callout warn">
-      <div class="callout-icon">⚠️</div>
-      <div class="callout-body"><strong>Overfitting:</strong> train loss klesá, val loss roste. Řešení: early stopping, dropout, L2 regularizace, více dat.</div>
-    </div>
-
-    <h3>Přehled hyperparametrů</h3>
-    <table>
-      <thead><tr><th>Hyperparametr</th><th>Typická hodnota</th><th>Vliv</th></tr></thead>
-      <tbody>
-        <tr><td>Learning rate (SGD)</td><td>0.01–0.1</td><td>Rychlost konvergence</td></tr>
-        <tr><td>Learning rate (Adam)</td><td>0.001</td><td>Robustní vůči špatné volbě</td></tr>
-        <tr><td>Batch size</td><td>32–256</td><td>Větší = stabilnější, pomalejší</td></tr>
-        <tr><td>Epochy</td><td>20–1000</td><td>Závisí na datasetu</td></tr>
-        <tr><td>Neurony / vrstva</td><td>32–512</td><td>Kapacita sítě</td></tr>
-        <tr><td>Vrstvy</td><td>2–5</td><td>Hloubka reprezentace</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <hr class="divider">
-
-  <!-- ── A. Regrese ── -->
-  <section class="section" id="regrese">
-    <div class="section-header">
-      <div class="section-num">A</div>
-      <h2>Příklad: Regrese</h2>
-    </div>
-
-    <p>Naučíme síť aproximovat funkci \(y = \sin(2\pi x) + \varepsilon\).</p>
-
-    <table>
-      <thead><tr><th>Vlastnost</th><th>Hodnota</th></tr></thead>
-      <tbody>
-        <tr><td>Architektura</td><td>1 → 32 → 32 → 1</td></tr>
-        <tr><td>Aktivace</td><td>ReLU, ReLU, Linear</td></tr>
-        <tr><td>Loss</td><td>MSE</td></tr>
-        <tr><td>Optimizer</td><td>SGD, lr=0.01</td></tr>
-        <tr><td>Výsledek</td><td>Test MSE → 0.017 (PyTorch)</td></tr>
-      </tbody>
-    </table>
-
-    <div class="code-wrap">
-      <div class="code-tabs">
-        <button class="code-tab active" onclick="switchTab(this,'cpp-reg')">C++</button>
-        <button class="code-tab" onclick="switchTab(this,'py-reg')">Python</button>
-      </div>
-      <div id="cpp-reg" class="code-panel active">
-<pre>Network net(<span class="num">0.01</span>); <span class="cm">// SGD, lr=0.01</span>
+    <div id="cpp-reg" class="code-panel active">
+<pre>Network net(<span class="num">0.01</span>);  <span class="cm">// SGD, lr=0.01</span>
 net.add_layer(<span class="num">1</span>,  <span class="num">32</span>, Activation::ReLU);
 net.add_layer(<span class="num">32</span>, <span class="num">32</span>, Activation::ReLU);
 net.add_layer(<span class="num">32</span>,  <span class="num">1</span>, Activation::Linear);
 
-<span class="kw">for</span> (<span class="ty">int</span> epoch = <span class="num">1</span>; epoch &lt;= <span class="num">500</span>; epoch++) {
-    <span class="ty">double</span> loss = net.train_epoch(
-        X, Y, <span class="num">64</span>,       <span class="cm">// batch size</span>
-        mse_loss,         <span class="cm">// L = mean((ŷ-y)²)</span>
-        mse_grad          <span class="cm">// ∂L/∂ŷ = 2(ŷ-y)/n</span>
-    );
-}</pre>
-      </div>
-      <div id="py-reg" class="code-panel">
+<span class="kw">for</span> (<span class="ty">int</span> epoch = <span class="num">1</span>; epoch <= <span class="num">500</span>; epoch++)
+    net.train_epoch(X, Y, <span class="num">64</span>, mse_loss, mse_grad);</pre>
+    </div>
+    <div id="py-reg" class="code-panel">
 <pre>model = nn.Sequential(
-    nn.Linear(<span class="num">1</span>, <span class="num">32</span>),  nn.ReLU(),
-    nn.Linear(<span class="num">32</span>, <span class="num">32</span>), nn.ReLU(),
-    nn.Linear(<span class="num">32</span>, <span class="num">1</span>),           <span class="cm"># bez aktivace</span>
+    nn.Linear(<span class="num">1</span>,<span class="num">32</span>), nn.ReLU(),
+    nn.Linear(<span class="num">32</span>,<span class="num">32</span>), nn.ReLU(),
+    nn.Linear(<span class="num">32</span>,<span class="num">1</span>)
 )
-optimizer = torch.optim.SGD(model.parameters(), lr=<span class="num">0.01</span>)
-loss_fn   = nn.MSELoss()
-
-<span class="kw">for</span> X_b, y_b <span class="kw">in</span> loader:
-    pred = model(X_b)
-    loss = loss_fn(pred, y_b)
-    optimizer.zero_grad()
-    loss.backward()
-    optimizer.step()</pre>
-      </div>
+opt = torch.optim.SGD(model.parameters(), lr=<span class="num">0.01</span>)
+<span class="kw">for</span> Xb, yb <span class="kw">in</span> loader:
+    loss = nn.MSELoss()(model(Xb), yb)
+    opt.zero_grad(); loss.backward(); opt.step()</pre>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ── B. Klasifikace ── -->
-  <section class="section" id="klasifikace">
-    <div class="section-header">
-      <div class="section-num">B</div>
-      <h2>Příklad: MNIST klasifikace</h2>
-    </div>
+<section class="section" id="klasifikace">
+  <div class="section-header"><div class="section-num">B</div><h2>Příklad: MNIST klasifikace</h2></div>
+  <p>Rozpoznávání ručně psaných číslic 0–9 z obrázků 28×28 pixelů.</p>
+  <table>
+    <thead><tr><th>Vlastnost</th><th>Hodnota</th></tr></thead>
+    <tbody>
+      <tr><td>Vstup</td><td>784 pixelů (28×28, normalizované 0–1)</td></tr>
+      <tr><td>Architektura</td><td>784 → 256 → 128 → 10</td></tr>
+      <tr><td>Aktivace</td><td>ReLU, ReLU, Softmax</td></tr>
+      <tr><td>Loss</td><td>Cross-Entropy</td></tr>
+      <tr><td>Optimizer</td><td>SGD + momentum=0.9, lr=0.1</td></tr>
+      <tr><td>Výsledek</td><td><strong>97.54 %</strong> přesnost (20 epoch)</td></tr>
+    </tbody>
+  </table>
+  <div class="callout info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-body"><strong>One-hot kódování:</strong> Štítek třídy 3 → <code>[0,0,0,1,0,0,0,0,0,0]</code>. Síť predikuje 10 pravděpodobností (softmax), srovnáváme s one-hot vektorem přes Cross-Entropy.</div>
+  </div>
+</section>
 
-    <p>Rozpoznávání ručně psaných číslic 0–9. Vstup: 784 pixelů (28×28), výstup: 10 tříd.</p>
+<section class="section" id="custom">
+  <div class="section-header"><div class="section-num">C</div><h2>Příklad: Vlastní dataset</h2></div>
+  <p>Binární klasifikace na <strong>two-moons</strong> datasetu — dvě interleaved půlkružnice, lineárně neseparovatelné.</p>
+  <table>
+    <thead><tr><th>Vlastnost</th><th>Hodnota</th></tr></thead>
+    <tbody>
+      <tr><td>Architektura</td><td>2 → 64 → 64 → 1</td></tr>
+      <tr><td>Aktivace</td><td>ReLU, ReLU, Sigmoid</td></tr>
+      <tr><td>Loss</td><td>Binary Cross-Entropy</td></tr>
+      <tr><td>Optimizer</td><td>Adam, lr=0.001</td></tr>
+      <tr><td>Výsledek</td><td><strong>100 %</strong> přesnost (C++ i Python)</td></tr>
+    </tbody>
+  </table>
+  <div class="cards">
+    <div class="card"><div class="card-icon">📊</div><h4>Normalizace</h4><p>z-score na train datech, stejné μ,σ pro val/test</p></div>
+    <div class="card"><div class="card-icon">✂️</div><h4>Train/Val/Test split</h4><p>80 % / 10 % / 10 %</p></div>
+    <div class="card"><div class="card-icon">🛑</div><h4>Early stopping</h4><p>Sleduj val_loss, ulož nejlepší váhy</p></div>
+    <div class="card"><div class="card-icon">📏</div><h4>Metriky</h4><p>Precision, Recall, F1 (nestačí jen Accuracy)</p></div>
+  </div>
+</section>
 
-    <table>
-      <thead><tr><th>Vlastnost</th><th>Hodnota</th></tr></thead>
-      <tbody>
-        <tr><td>Architektura</td><td>784 → 256 → 128 → 10</td></tr>
-        <tr><td>Aktivace</td><td>ReLU, ReLU, Softmax</td></tr>
-        <tr><td>Loss</td><td>Cross-Entropy</td></tr>
-        <tr><td>Optimizer</td><td>SGD + momentum, lr=0.1</td></tr>
-        <tr><td>Výsledek</td><td><strong>97.54%</strong> přesnost (PyTorch, 20 epoch)</td></tr>
-      </tbody>
-    </table>
-
-    <div class="callout info">
-      <div class="callout-icon">💡</div>
-      <div class="callout-body"><strong>One-hot kódování:</strong> Štítek třídy 3 → <code>[0,0,0,1,0,0,0,0,0,0]</code>. Síť predikuje 10 pravděpodobností (softmax), porovnáváme s one-hot vektorem.</div>
-    </div>
-  </section>
-
-  <!-- ── C. Custom ── -->
-  <section class="section" id="custom">
-    <div class="section-header">
-      <div class="section-num">C</div>
-      <h2>Příklad: Vlastní dataset</h2>
-    </div>
-
-    <p>Binární klasifikace na <strong>two-moons</strong> datasetu — dvě půlkružnice, lineárně neseparovatelné.</p>
-
-    <table>
-      <thead><tr><th>Vlastnost</th><th>Hodnota</th></tr></thead>
-      <tbody>
-        <tr><td>Architektura</td><td>2 → 64 → 64 → 1</td></tr>
-        <tr><td>Aktivace</td><td>ReLU, ReLU, Sigmoid</td></tr>
-        <tr><td>Loss</td><td>Binary Cross-Entropy</td></tr>
-        <tr><td>Optimizer</td><td>Adam, lr=0.001</td></tr>
-        <tr><td>Výsledek</td><td><strong>100%</strong> přesnost (C++ i Python)</td></tr>
-      </tbody>
-    </table>
-
-    <h3>Klíčové koncepty pro vlastní data</h3>
-    <div class="cards">
-      <div class="card">
-        <div class="card-icon">📊</div>
-        <h4>Normalizace</h4>
-        <p>z-score na trénovacích datech, stejné μ,σ pro val/test</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">✂️</div>
-        <h4>Train/Val/Test split</h4>
-        <p>Typicky 70/15/15 nebo 80/10/10</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🛑</div>
-        <h4>Early stopping</h4>
-        <p>Sleduj val_loss, uložíme nejlepší váhy</p>
-      </div>
-      <div class="card">
-        <div class="card-icon">📏</div>
-        <h4>Metriky</h4>
-        <p>Accuracy nestačí — Precision, Recall, F1</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Váhy & Colab ── -->
-  <section class="section" id="vahy">
-    <div class="section-header">
-      <div class="section-num">⬇</div>
-      <h2>Stáhnout váhy / Colab</h2>
-    </div>
-
-    <p>Všechny modely jsou natrénované a uložené v repozitáři. Stačí načíst — trénovat nemusíš.</p>
-
-    <div class="cards">
-      <div class="card">
-        <div class="card-icon">📈</div>
-        <h4>Regrese</h4>
-        <p>1→32→32→1, SGD<br><a href="https://raw.githubusercontent.com/navidofek-cmyk/ml_nn_sets/main/weights/regression_pt.pth" style="color:var(--accent2)">regression_pt.pth</a></p>
-      </div>
-      <div class="card">
-        <div class="card-icon">🌙</div>
-        <h4>Two-moons</h4>
-        <p>2→64→64→1, Adam<br><a href="https://raw.githubusercontent.com/navidofek-cmyk/ml_nn_sets/main/weights/moons_pt.pth" style="color:var(--accent2)">moons_pt.pth</a></p>
-      </div>
-      <div class="card">
-        <div class="card-icon">✏️</div>
-        <h4>MNIST</h4>
-        <p>784→256→128→10<br><a href="https://raw.githubusercontent.com/navidofek-cmyk/ml_nn_sets/main/weights/mnist_pt.pth" style="color:var(--accent2)">mnist_pt.pth</a></p>
-      </div>
-    </div>
-
-    <h3>Načtení vah v Pythonu</h3>
-    <pre class="solo"><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
-
-model = nn.Sequential(nn.Flatten(),
-    nn.Linear(<span class="num">784</span>,<span class="num">256</span>), nn.ReLU(),
-    nn.Linear(<span class="num">256</span>,<span class="num">128</span>), nn.ReLU(),
-    nn.Linear(<span class="num">128</span>,<span class="num">10</span>))
-
-model.load_state_dict(torch.load(<span class="str">'mnist_pt.pth'</span>, map_location=<span class="str">'cpu'</span>))
-model.eval()
-<span class="cm"># → rovnou predikuj, bez trénování</span></pre>
-
-    <h3>Spustit vše v prohlížeči — Google Colab</h3>
-    <p>Notebook obsahuje všechny 3 příklady s načítáním vah, vizualizacemi a možností přetrénovat od nuly.</p>
-    <a class="btn btn-primary" href="https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb" target="_blank" style="display:inline-flex; margin-top:8px">
-      ▶ &nbsp;Otevřít v Google Colabu
-    </a>
-  </section>
+<!-- ── Váhy & Colab ── -->
+<section class="section" id="vahy">
+  <div class="section-header"><div class="section-num">⬇</div><h2>Stáhnout váhy / Colab</h2></div>
+  <p>Všechny modely jsou natrénované a uložené v repozitáři. Stačí načíst — trénovat nemusíš.</p>
+  <div class="cards">
+    <div class="card"><div class="card-icon">📈</div><h4>Regrese</h4><p><a href="https://raw.githubusercontent.com/navidofek-cmyk/ml_nn_sets/main/weights/regression_pt.pth" style="color:var(--accent2)">regression_pt.pth</a></p></div>
+    <div class="card"><div class="card-icon">🌙</div><h4>Two-moons</h4><p><a href="https://raw.githubusercontent.com/navidofek-cmyk/ml_nn_sets/main/weights/moons_pt.pth" style="color:var(--accent2)">moons_pt.pth</a></p></div>
+    <div class="card"><div class="card-icon">✏️</div><h4>MNIST</h4><p><a href="https://raw.githubusercontent.com/navidofek-cmyk/ml_nn_sets/main/weights/mnist_pt.pth" style="color:var(--accent2)">mnist_pt.pth</a></p></div>
+  </div>
+  <a class="btn btn-primary" href="https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb" target="_blank" style="display:inline-flex;margin-top:16px">▶ &nbsp;Otevřít v Google Colabu</a>
+</section>
 
 </main>
 </div>
@@ -627,7 +750,6 @@ model.eval()
 function toggleSidebar() {
   document.getElementById('sidebar').classList.toggle('open');
 }
-
 function switchTab(btn, panelId) {
   const wrap = btn.closest('.code-wrap');
   wrap.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
@@ -635,19 +757,17 @@ function switchTab(btn, panelId) {
   btn.classList.add('active');
   document.getElementById(panelId).classList.add('active');
 }
-
-// Active nav on scroll
 const sections = document.querySelectorAll('section[id], .hero[id]');
 const navItems = document.querySelectorAll('.nav-item');
 const observer = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
       navItems.forEach(n => n.classList.remove('active'));
-      const active = document.querySelector(`.nav-item[href="#${entry.target.id}"]`);
-      if (active) active.classList.add('active');
+      const a = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
     }
   });
-}, { threshold: 0.3 });
+}, { threshold: 0.2 });
 sections.forEach(s => observer.observe(s));
 </script>
 </body>
