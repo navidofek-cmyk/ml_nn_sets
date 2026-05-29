@@ -5,6 +5,12 @@
 
 Kompletní tutorial: od matematiky přes implementaci v C++ až po PyTorch ekvivalenty.
 
+## 🌐 Interaktivní web s teorií
+
+**[navidofek-cmyk.github.io/ml_nn_sets](https://navidofek-cmyk.github.io/ml_nn_sets)**
+
+Obsahuje veškerou matematiku (backprop, Adam, inicializace vah...) s rovnicemi, ukázkami kódu v C++ i Pythonu a přehledem všech příkladů.
+
 ## Struktura
 
 ```
