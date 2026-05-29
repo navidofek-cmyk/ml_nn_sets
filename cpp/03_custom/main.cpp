@@ -217,6 +217,7 @@ int main() {
     std::cout << "Recall:    " << m.recall    * 100 << "%\n";
     std::cout << "F1 score:  " << m.f1        * 100 << "%\n";
 
+    net.save("../../weights/moons.bin");
     return 0;
 }
 

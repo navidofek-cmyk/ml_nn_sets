@@ -98,6 +98,7 @@ int main() {
                   << std::setw(9) << Y_pred.at(0, i)  << "\n";
     }
 
+    net.save("../../weights/regression.bin");
     std::cout << "\nHotovo!\n";
     return 0;
 }

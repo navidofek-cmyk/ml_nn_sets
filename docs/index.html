@@ -47,9 +47,15 @@
   </div>
 
   <div class="nav-section">
-    <div class="nav-label">Kód</div>
+    <div class="nav-label">Kód &amp; Váhy</div>
     <a class="nav-item" href="https://github.com/navidofek-cmyk/ml_nn_sets" target="_blank">
       <span class="num">↗</span>GitHub
+    </a>
+    <a class="nav-item" href="https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb" target="_blank">
+      <span class="num">▶</span>Colab notebook
+    </a>
+    <a class="nav-item" href="#vahy">
+      <span class="num">⬇</span>Stáhnout váhy
     </a>
   </div>
 </nav>
@@ -64,6 +70,7 @@
     <p>Kompletní průvodce: od matematiky přes C++ implementaci až po PyTorch. Žádné černé skříňky.</p>
     <div class="hero-links">
       <a class="btn btn-primary" href="https://github.com/navidofek-cmyk/ml_nn_sets" target="_blank">⬡ GitHub repozitář</a>
+      <a class="btn btn-ghost" href="https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb" target="_blank">▶ Spustit v Colabu</a>
       <a class="btn btn-ghost" href="#vrstva">Začít číst →</a>
     </div>
   </div>
@@ -560,6 +567,52 @@ loss_fn   = nn.MSELoss()
         <p>Accuracy nestačí — Precision, Recall, F1</p>
       </div>
     </div>
+  </section>
+
+  <!-- ── Váhy & Colab ── -->
+  <section class="section" id="vahy">
+    <div class="section-header">
+      <div class="section-num">⬇</div>
+      <h2>Stáhnout váhy / Colab</h2>
+    </div>
+
+    <p>Všechny modely jsou natrénované a uložené v repozitáři. Stačí načíst — trénovat nemusíš.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">📈</div>
+        <h4>Regrese</h4>
+        <p>1→32→32→1, SGD<br><a href="https://raw.githubusercontent.com/navidofek-cmyk/ml_nn_sets/main/weights/regression_pt.pth" style="color:var(--accent2)">regression_pt.pth</a></p>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌙</div>
+        <h4>Two-moons</h4>
+        <p>2→64→64→1, Adam<br><a href="https://raw.githubusercontent.com/navidofek-cmyk/ml_nn_sets/main/weights/moons_pt.pth" style="color:var(--accent2)">moons_pt.pth</a></p>
+      </div>
+      <div class="card">
+        <div class="card-icon">✏️</div>
+        <h4>MNIST</h4>
+        <p>784→256→128→10<br><a href="https://raw.githubusercontent.com/navidofek-cmyk/ml_nn_sets/main/weights/mnist_pt.pth" style="color:var(--accent2)">mnist_pt.pth</a></p>
+      </div>
+    </div>
+
+    <h3>Načtení vah v Pythonu</h3>
+    <pre class="solo"><span class="kw">import</span> torch, torch.nn <span class="kw">as</span> nn
+
+model = nn.Sequential(nn.Flatten(),
+    nn.Linear(<span class="num">784</span>,<span class="num">256</span>), nn.ReLU(),
+    nn.Linear(<span class="num">256</span>,<span class="num">128</span>), nn.ReLU(),
+    nn.Linear(<span class="num">128</span>,<span class="num">10</span>))
+
+model.load_state_dict(torch.load(<span class="str">'mnist_pt.pth'</span>, map_location=<span class="str">'cpu'</span>))
+model.eval()
+<span class="cm"># → rovnou predikuj, bez trénování</span></pre>
+
+    <h3>Spustit vše v prohlížeči — Google Colab</h3>
+    <p>Notebook obsahuje všechny 3 příklady s načítáním vah, vizualizacemi a možností přetrénovat od nuly.</p>
+    <a class="btn btn-primary" href="https://colab.research.google.com/github/navidofek-cmyk/ml_nn_sets/blob/main/colab_tutorial.ipynb" target="_blank" style="display:inline-flex; margin-top:8px">
+      ▶ &nbsp;Otevřít v Google Colabu
+    </a>
   </section>
 
 </main>

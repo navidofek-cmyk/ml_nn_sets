@@ -15,6 +15,7 @@
 #include <cmath>
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 
 enum class Optimizer { SGD, Adam };
 
@@ -171,6 +172,47 @@ public:
             num_batches++;
         }
         return total_loss / num_batches;
+    }
+
+    // ── Uložení / načtení vah ────────────────────────────────────────────────
+    // Formát: magic(4B) | počet vrstev(4B) | pro každou vrstvu: rows,cols W | data W | rows b | data b
+    void save(const std::string& path) const {
+        std::ofstream f(path, std::ios::binary);
+        if (!f) throw std::runtime_error("Nelze otevřít pro zápis: " + path);
+        uint32_t magic = 0x4E4E5746; // "NNWF"
+        uint32_t n = layers.size();
+        f.write(reinterpret_cast<const char*>(&magic), 4);
+        f.write(reinterpret_cast<const char*>(&n), 4);
+        for (const auto& l : layers) {
+            uint32_t wr = l.W.rows, wc = l.W.cols, br = l.b.rows;
+            f.write(reinterpret_cast<const char*>(&wr), 4);
+            f.write(reinterpret_cast<const char*>(&wc), 4);
+            f.write(reinterpret_cast<const char*>(l.W.data.data()), wr * wc * sizeof(double));
+            f.write(reinterpret_cast<const char*>(&br), 4);
+            f.write(reinterpret_cast<const char*>(l.b.data.data()), br * sizeof(double));
+        }
+        std::cout << "Váhy uloženy do: " << path << "\n";
+    }
+
+    void load(const std::string& path) {
+        std::ifstream f(path, std::ios::binary);
+        if (!f) throw std::runtime_error("Nelze otevřít: " + path);
+        uint32_t magic, n;
+        f.read(reinterpret_cast<char*>(&magic), 4);
+        if (magic != 0x4E4E5746) throw std::runtime_error("Špatný formát souboru (očekáván NNWF)");
+        f.read(reinterpret_cast<char*>(&n), 4);
+        if (n != layers.size()) throw std::runtime_error("Počet vrstev nesedí");
+        for (auto& l : layers) {
+            uint32_t wr, wc, br;
+            f.read(reinterpret_cast<char*>(&wr), 4);
+            f.read(reinterpret_cast<char*>(&wc), 4);
+            if (wr != (uint32_t)l.W.rows || wc != (uint32_t)l.W.cols)
+                throw std::runtime_error("Rozměry vah nesedí");
+            f.read(reinterpret_cast<char*>(l.W.data.data()), wr * wc * sizeof(double));
+            f.read(reinterpret_cast<char*>(&br), 4);
+            f.read(reinterpret_cast<char*>(l.b.data.data()), br * sizeof(double));
+        }
+        std::cout << "Váhy načteny z: " << path << "\n";
     }
 
     // ── Shrnutí architektury ───────────────────────────────────────────────────
